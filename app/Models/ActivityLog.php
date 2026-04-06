@@ -15,7 +15,7 @@ class ActivityLog extends Model
 
     // fungsi helper untuk mencatat aktivitas
     public static function record($action, $desc = null ) {
-        self::create([
+        return self::create([
             'user_id' => Auth::id(),
             'action' => $action,
             'description' => $desc,

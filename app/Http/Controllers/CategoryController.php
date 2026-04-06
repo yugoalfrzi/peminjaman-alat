@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
-use App\ModelsCategoryLog; //untuk mencatat log
+use App\Models\ActivityLog; //untuk mencatat log
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
@@ -32,7 +32,7 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nama_kategori' => 'required|string|max:255|unique|categories,nama_kategori'
+            'nama_kategori' => 'required|string|max:255|unique:categories,nama_kategori'
         ]);
 
         Category::create([
@@ -41,7 +41,7 @@ class CategoryController extends Controller
 
         ActivityLog::record('Tambah Kategori', 'Menambah Kategori' . $request->nama_kategori);
 
-        return redirect()->route('Categories.index')->with('success', 'Kategori berhasil ditambahkan');
+        return redirect()->route('categories.index')->with('success', 'Kategori berhasil ditambahkan');
     }
 
     /**
@@ -68,7 +68,7 @@ class CategoryController extends Controller
 
         ActivityLog::record('Update Kategori', "Mengupdate Kategori $oldName menjadi" . $request->nama_kategori);
 
-        return redirect()->route('Categories.index')->with('success', 'Kategori berhasil diperbarui');
+        return redirect()->route('categories.index')->with('success', 'Kategori berhasil diperbarui');
     }
 
     /**

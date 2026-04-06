@@ -104,7 +104,7 @@ class AdminLoanController extends Controller
             'tanggal_pinjam' => $request->tanggal_pinjam,
             'tanggal_kembali_rencana' => $request->tanggal_kembali_rencana,
             'status' => $request->status,
-            'tanggal _kembali_aktual' => $request->tanggal_kembali_aktual ?? $loan->tanggal_kembali_aktual
+            'tanggal_kembali_aktual' => $request->tanggal_kembali_aktual ?? $loan->tanggal_kembali_aktual
         ]);
 
         return redirect()->route('admin.loans.index')->with('success', 'Data berhasil diperbarui.');

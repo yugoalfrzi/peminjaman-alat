@@ -22,7 +22,7 @@
                 <tbody>
                     @forelse($return as $key => $r)
                     <tr>
-                        <td>{{ $returns->firstItem() + $key }}</td>
+                        <td>{{ $return->firstItem() + $key }}</td>
                         <td>{{ $r->user->name }}</td>
                         <td>{{ $r->tool->nama_alat }}</td>
                         <td>{{ $r->tanggal_pinjam }}</td>

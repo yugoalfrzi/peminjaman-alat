@@ -37,7 +37,7 @@ class ToolController extends Controller
     {
         // validasi input
         $request->validate([
-            'name' => 'required|string|max:255',
+            'nama_alat' => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
             'stok' => 'required|integer|min:0',
             'gambar' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',//max 2mb
@@ -56,12 +56,12 @@ class ToolController extends Controller
             'nama_alat' => $request->nama_alat,
             'category_id' => $request->category_id,
             'stok' => $request->stok,
-            'deskripsi' => $request->deskripsi,
             'gambar' => $gambarPath,
+            'deskripsi' => $request->deskripsi,
         ]);
 
         // catat log
-        ActivityLog::record(['Tambah Alat', 'Menambahkan alat baru' .$request->nama_alat]);
+        ActivityLog::record('Tambah Alat', 'Menambahkan alat baru' . $request->nama_alat);
 
         return redirect()->route('tools.index')->with('success', 'Alat berhasil ditambahkan.');
     }
@@ -98,7 +98,7 @@ class ToolController extends Controller
             $data['gambar'] = $request->file('gambar')->store('tools', 'public');
         }
 
-        $tool->update($data);
+        $tool->update($request->all());
 
         ActivityLog::record('Update alat', 'Memperbarui data alat' . $tool->nama_alat);
 

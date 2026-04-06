@@ -43,8 +43,8 @@ class AdminReturnController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validat ([
-            'loan_id' => 'required|exist:loans,id',
+        $request->validate([
+            'loan_id' => 'required|exists:loans,id',
             'denda' => 'nullable|integer' 
         ]);
 
