@@ -79,41 +79,48 @@
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header bg-light fw-bold">
-                        <h2>Aktivitas Sistem Terakhir</h2>
+        <div class="row justify-content-center">
+            <div class="col-md-10 col-lg-8">
+                <div class="card mb-4 shadow-sm border-0 rounded-4">
+                    <div class="card-header bg-white border-0 pt-4 pb-0">
+                        <h2 class="h5 fw-bold ">
+                             Aktivitas Sistem Terakhir
+                        </h2>
                     </div>
                     <div class="card-body p-0">
-                        <table class="table table-hover mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Waktu</th>
-                                    <th>User</th>
-                                    <th>Aksi</th>
-                                    <th>Deskripsi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($recentLogs as $log)
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
                                     <tr>
-                                        <td class="small text-muted">{{ $log->created_at->diffForHumans() }}</td>
-                                        <td>
-                                            <span class="fw-bold">{{ $log->user->name }}</span>
-                                            <br>
-                                            <span class="badge bg-secondary" style="font-size: 0.7em">{{ ucfirst($log->user->role) }}</span>
-                                        </td>
-                                        <td>{{ $log->action }}</td>
-                                        <td class="text-muted small">{{Str::limit($log->description, 50) }}</td>
+                                        <th style="width: 15%">Waktu</th>
+                                        <th style="width: 20%">User</th>
+                                        <th style="width: 20%">Aksi</th>
+                                        <th style="width: 45%">Deskripsi</th>
                                     </tr>
-                                @empty
-                                <tr>
-                                    <td colspan="4" class="text-center py-3">Belum ada aktivitas tercatat.</td>
-                                </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    @forelse($recentLogs as $log)
+                                        <tr>
+                                            <td class="small text-muted">{{ $log->created_at->diffForHumans() }}</td>
+                                            <td>
+                                                <span class="fw-bold">{{ $log->user->name }}</span><br>
+                                                <span class="badge bg-primary bg-opacity-10 text-secondary" style="font-size: 0.7em">
+                                                    {{ ucfirst($log->user->role) }}
+                                                </span>
+                                            </td>
+                                            <td>{{ $log->action }}</td>
+                                            <td class="text-muted small">{{ Str::limit($log->description, 60) }}</td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="4" class="text-center py-4 text-muted">
+                                                <i class="fas fa-inbox me-2"></i> Belum ada aktivitas tercatat.
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                     <div class="card-footer text-end">
                         <a href="{{ url('/admin/logs') }}" class="btn btn-sm btn-outline-secondary">Lihat Semua Log</a>

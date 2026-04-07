@@ -31,7 +31,7 @@
                             </td>
                         </tr>
                         @empty
-                        <tr><td colspan="5" class="text-center">Tidak ada permintaan baru.</td></tr>
+                        <tr><td colspan="5" class="text-center">Tidak ada permintaan baru</td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -47,6 +47,7 @@
                         <th>Peminjam</th>
                         <th>Alat</th>
                         <th>Status</th>
+                        <th>Rencana Kembali</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -56,6 +57,7 @@
                             <td>{{ $active->user->name }}</td>
                             <td>{{ $active->tool->nama_alat }}</td>
                             <td><span class="badge bg-primary">{{ $active->status }}</span></td>
+                            <td>{{ $active->tanggal_kembali_rencana }}</td>
                             <td>
                                 <form action="{{ url('/petugas/return/'.$active->id) }}" method="POST">
                                     @csrf
@@ -64,7 +66,7 @@
                             </td>
                         </tr>
                         @empty
-                        <tr><td colspan="4" class="text-center">Tidak ada data.</td></tr> 
+                        <tr><td colspan="4" class="text-center">Tidak ada data</td></tr> 
                     @endforelse
                 </tbody>
             </table>
@@ -94,7 +96,7 @@
                             </span></td>
                         </tr>
                     @empty
-                        <tr><td colspan="3" class="text-center">Tidak ada data.</td></tr>
+                        <tr><td colspan="3" class="text-center">Tidak ada data</td></tr>
                     @endforelse
                 </tbody>
             </table>
