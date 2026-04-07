@@ -36,7 +36,7 @@
                                 @endif
                             </td>
                             <td>
-                                <a href="{{ route('admin.loans.edit', $loan->id) }}" class="btn btn-sm btn-info text-white">Edit</a>
+                                <a href="{{ route('admin.loans.edit', $loan->id) }}" class="btn btn-sm btn-warning text-white">Edit</a>
                                 <form action="{{ route('admin.loans.destroy', $loan->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin hapus data ini?');">
                                     @csrf
                                     @method('DELETE')

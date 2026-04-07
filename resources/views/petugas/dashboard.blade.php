@@ -51,7 +51,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($activeLoans as $active)
+                    @forelse($activeLoans as $active)
                         <tr>
                             <td>{{ $active->user->name }}</td>
                             <td>{{ $active->tool->nama_alat }}</td>
@@ -63,14 +63,16 @@
                                 </form>
                             </td>
                         </tr>
-                    @endforeach
+                        @empty
+                        <tr><td colspan="4" class="text-center">Tidak ada data.</td></tr> 
+                    @endforelse
                 </tbody>
             </table>
         </div>
     </div>
     <h3>Daftar Sudah Dikembalikan</h3>
     <div class="card">
-        <div class="card-header bg-info text-white">Monitor Peminjaman</div>
+        <div class="card-header bg-success text-white">Monitor Peminjaman</div>
         <div class="card-body">
             <table class="table">
                 <thead>
@@ -81,13 +83,19 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($sudahDikembalikan as $sudah)
+                    @forelse($sudahDikembalikan as $sudah)
                         <tr>
                             <td>{{ $sudah->user->name }}</td>
                             <td>{{ $sudah->tool->nama_alat }}</td>
-                            <td><span class="badge bg-primary">{{ $sudah->status }}</span></td>
+                            <td><span class="badge bg-success">
+                                @if($sudah->status == 'kembali')
+                                    Sudah Kembali
+                                @endif
+                            </span></td>
                         </tr>
-                    @endforeach
+                    @empty
+                        <tr><td colspan="3" class="text-center">Tidak ada data.</td></tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>

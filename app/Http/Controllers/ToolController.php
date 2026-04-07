@@ -48,7 +48,7 @@ class ToolController extends Controller
         $gambarPath = null;
         if ($request->hasFile('gambar')){
             //simpan difolder: storage/app/public/tools
-            $gambarPath = $request->file('gambar')->storage('tools','public');
+            $gambarPath = $request->file('gambar')->store('tools','public');
         }
 
         // simpan ke database   
@@ -110,6 +110,11 @@ class ToolController extends Controller
      */
     public function destroy(Tool $tool)
     {
+        // Cek apakah alat ini masih memiliki data peminjaman (apapun statusnya)
+        if ($tool->loans()->count() > 0) {
+            return back()->withErrors(['error' => 'Alat tidak bisa dihapus karena masih memiliki riwayat peminjaman. Hapus data peminjaman terlebih dahulu.']);
+        }
+        
         //hapus gambar jika ada
         if ($tool->gambar && Storage::disk('public')->exists($tool->gambar)) {
             Storage::disk('public')->delete($tool->gambar);

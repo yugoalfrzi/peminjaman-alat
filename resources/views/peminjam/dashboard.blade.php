@@ -8,6 +8,7 @@
                 <div class="card h-100">
                     <div class="card-body">
                         <h5 class="card-title">{{ $tool->nama_alat }}</h5>
+                        <img src="{{ $tool->gambar ? asset('storage/'.$tool->gambar) : asset('images/default-tool.png') }}" class="card-img-top mb-3" alt="{{ $tool->nama_alat }}" style="height: 200px; object-fit: cover;">
                         <span class="badge bg-secondary mb-2">{{ $tool->category->nama_kategori }}</span>
                         <p class="card-text">{{ $tool->deskripsi }}</p>
                         <p class="fw-bold">Sisa Stok: {{ $tool->stok }}</p>
