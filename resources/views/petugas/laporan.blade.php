@@ -10,8 +10,9 @@
     </style>
 </head>
 <body class="p-4">
-    <div class="d-flex justify-content-between mb-4">
-        <h2>Laporan Peminjaman Alat</h2>
+    <h2 class="text-center">Laporan Peminjaman Alat</h2>
+    <div class="d-flex justify-content-end mb-4">
+        <button onclick="window.location.href='{{ url('/petugas/dashboard') }}'" class="btn btn-secondary me-2">Kembali</button>
         <button onclick="window.print()" class="btn btn-primary no-print">Cetak PDF / Print</button>
     </div>
     <table class="table table-bordered">
@@ -23,6 +24,7 @@
                 <th>Tgl Pinjam</th>
                 <th>Tgl Kembali</th>
                 <th>Status</th>
+                <th>Denda (Rp)</th>
             </tr>
         </thead>
         <tbody>
@@ -34,6 +36,7 @@
                     <td>{{ $loan->tanggal_pinjam }}</td>
                     <td>{{ $loan->tanggal_kembali_aktual ?? '-' }}</td>
                     <td>{{ ucfirst($loan->status) }}</td>
+                    <td>{{ $loan->denda > 0 ? 'Rp ' . number_format($loan->denda, 0, ',', '.') : 'Rp 0' }}</td>
                 </tr>
             @endforeach
         </tbody>

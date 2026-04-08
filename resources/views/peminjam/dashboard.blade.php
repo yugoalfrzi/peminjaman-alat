@@ -17,8 +17,8 @@
                                 @csrf
                                 <input type="hidden" name="tool_id" value="{{ $tool->id }}">
                                 <div class="mb-2">
-                                    <label class="small">Tgl Rencana Kembali</label>
-                                    <input type="date" name="tanggal_kembali" class="form-control form-control-sm" required min="{{ date('Y-m-d') }}">
+                                    <label class="small">Tanggal Rencana Kembali</label>
+                                    <input type="date" name="tanggal_kembali_rencana" class="form-control form-control-sm" required min="{{ date('Y-m-d') }}">
                                 </div>
                                 <button type="submit" class="btn btn-primary w-100">Pinjam Alat</button>
                             </form>

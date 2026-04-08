@@ -47,37 +47,37 @@ class PetugasController extends Controller
         $request->validate([
             'tanggal_kembali_aktual' => 'required|date',
         ]);
-
+    
         $loan = Loan::findOrFail($id);
-
+    
         if ($loan->status !== 'disetujui') {
             return back()->with('error', 'Peminjaman tidak valid atau sudah dikembalikan.');
         }
-
-        // 1) Simpan tanggal kembali aktual dan ubah status terlebih dahulu
+    
         $tanggalAktual = Carbon::parse($request->tanggal_kembali_aktual);
+        
+        // Simpan tanggal aktual
         $loan->tanggal_kembali_aktual = $tanggalAktual;
-        $loan->status = 'kembali';
-        $loan->save();
-
-        // 2) Hitung denda berdasarkan data yang sudah tersimpan di model
+        
+        // Hitung denda (method sudah benar)
         $denda = $loan->calculateDenda();
-
-        // 3) Simpan nilai denda
+        
+        // Update status, tanggal aktual, dan denda
+        $loan->status = 'kembali';
         $loan->denda = $denda;
         $loan->save();
-
-        // 4) Kembalikan stok
+    
+        // Kembalikan stok alat
         $tool = Tool::find($loan->tool_id);
         if ($tool) {
             $tool->increment('stok');
         }
-
-        // 5) Catat aktivitas
+    
+        // Catat aktivitas (opsional)
         if (class_exists(ActivityLog::class)) {
-            ActivityLog::record('Pengembalian (Petugas)', 'memproses pengembalian alat: ' . ($loan->tool->nama_alat ?? '-') . ' dengan denda RP ' . number_format($denda, 0, ',', '.'));
+            ActivityLog::record('Pengembalian (Petugas)', 'Memproses pengembalian alat: ' . ($loan->tool->nama_alat ?? '-') . ' dengan denda Rp ' . number_format($denda, 0, ',', '.'));
         }
-
+    
         return back()->with('success', 'Alat telah dikembalikan. Denda: Rp ' . number_format($denda, 0, ',', '.'));
     }
 

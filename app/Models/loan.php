@@ -3,13 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
-class loan extends Model
+class Loan extends Model
 {
-    protected $guarded = [] ;
+    protected $guarded = [];
 
-     protected $casts = [
-        'tanggal_kembali_rencana' => 'datetime',
+    protected $casts = [
+        'tanggal_pinjam'        => 'datetime',
+        'tanggal_kembali_rencana'=> 'datetime',
         'tanggal_kembali_aktual' => 'datetime',
     ];
 
@@ -25,18 +27,30 @@ class loan extends Model
 
     public function petugas()
     {
-        return $this->belongsTo(user::class, 'petugas_id');
+        return $this->belongsTo(User::class, 'petugas_id');
     }
 
+    /**
+     * Hitung denda keterlambatan.
+     * Denda Rp 5.000 per hari jika tanggal_kembali_aktual > tanggal_kembali_rencana.
+     */
     public function calculateDenda()
     {
-        if ($this->tanggal_kembali_aktual || $this->tanggal_kembali_rencana) {
+        // Jika tanggal aktual belum diisi, belum bisa hitung denda
+        if (!$this->tanggal_kembali_aktual || !$this->tanggal_kembali_rencana) {
             return 0;
         }
 
-        $hariTelat = max(0, $this->tanggal_kembali_aktual->diffInDays($this->tanggal_kembali_rencana));
-        $dendaPerhari = 5000;
+        // Jika tanggal aktual <= rencana, tidak telat
+        if ($this->tanggal_kembali_aktual->lte($this->tanggal_kembali_rencana)) {
+            return 0;
+        }
 
-        return $hariTelat * $dendaPerhari;
+        // Hitung selisih jam (pembulatan ke atas, atau tepat per jam)
+        $diffHours = $this->tanggal_kembali_rencana->diffInHours($this->tanggal_kembali_aktual);
+        $hariTelat = (int) ceil($diffHours / 24);
+
+        // diffInDays sudah positif karena aktual > rencana
+        return $hariTelat * 5000;
     }
 }

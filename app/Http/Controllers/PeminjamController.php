@@ -23,7 +23,7 @@ class PeminjamController extends Controller
                 'user_id' => Auth::id(),
                 'tool_id' => $request->tool_id,
                 'tanggal_pinjam' => now(),
-                'tanggal_kembali_rencana' => $request->tanggal_kembali,
+                'tanggal_kembali_rencana' => $request->tanggal_kembali_rencana,
                 'status' => 'pending'
             ]);
 

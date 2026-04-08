@@ -46,32 +46,33 @@ class AdminReturnController extends Controller
         $request->validate([
             'loan_id' => 'required|exists:loans,id',
         ]);
-
+    
         $loan = Loan::findOrFail($request->loan_id);
-
-        if ($loan->status != 'disetujui'){
-            return back()->with('error', 'data tidak valid atau sudah dikembalikan');
+    
+        if ($loan->status != 'disetujui') {
+            return back()->with('error', 'Data tidak valid atau sudah dikembalikan.');
         }
-
-        //set tanggal kembali aktual
+    
+        // Set tanggal kembali aktual = sekarang
         $loan->tanggal_kembali_aktual = now();
-        //hitung denda
+        
+        // Hitung denda
         $denda = $loan->calculateDenda();
-
-        // 1. update status dan tanggal
+    
+        // Update data
         $loan->update([
             'status' => 'kembali',
             'tanggal_kembali_aktual' => now(),
-            'denda' => $denda //jika tabel loans punya kolom denda
+            'denda' => $denda
         ]);
-
-        //2. kembalikan stok alat
+    
+        // Kembalikan stok
         $tool = Tool::findOrFail($loan->tool_id);
         $tool->increment('stok');
-
-        ActivityLog::record('Pengembalian (Admin)', 'memproses pengembalian alat: ' . $loan->tool->nama_alat . ' dengan denda RP ' . number_format($denda, 0, ',', '.') );
-
-        return redirect()->route('admin.returns.index')->with('success', 'alat berhasil dikembalikan. Denda: RP ' . number_format($denda, 0, ',', '.') );
+    
+        ActivityLog::record('Pengembalian (Admin)', 'Memproses pengembalian alat: ' . $loan->tool->nama_alat . ' dengan denda Rp ' . number_format($denda, 0, ',', '.'));
+    
+        return redirect()->route('admin.returns.index')->with('success', 'Alat berhasil dikembalikan. Denda: Rp ' . number_format($denda, 0, ',', '.'));
     }
 
     /**
