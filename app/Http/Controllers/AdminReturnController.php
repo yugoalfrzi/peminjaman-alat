@@ -45,7 +45,6 @@ class AdminReturnController extends Controller
     {
         $request->validate([
             'loan_id' => 'required|exists:loans,id',
-            'denda' => 'nullable|integer' 
         ]);
 
         $loan = Loan::findOrFail($request->loan_id);
@@ -54,20 +53,25 @@ class AdminReturnController extends Controller
             return back()->with('error', 'data tidak valid atau sudah dikembalikan');
         }
 
+        //set tanggal kembali aktual
+        $loan->tanggal_kembali_aktual = now();
+        //hitung denda
+        $denda = $loan->calculateDenda();
+
         // 1. update status dan tanggal
         $loan->update([
             'status' => 'kembali',
             'tanggal_kembali_aktual' => now(),
-            //'denda' => $request->denda //jika tabel loans punya kolom denda
+            'denda' => $denda //jika tabel loans punya kolom denda
         ]);
 
         //2. kembalikan stok alat
         $tool = Tool::findOrFail($loan->tool_id);
         $tool->increment('stok');
 
-        ActivityLog::record('Pengembalian (Admin)', 'memproses pengembalian alat: ' . $tool->nama_alat);
+        ActivityLog::record('Pengembalian (Admin)', 'memproses pengembalian alat: ' . $loan->tool->nama_alat . ' dengan denda RP ' . number_format($denda, 0, ',', '.') );
 
-        return redirect()->route('admin.returns.index')->with('success', 'alat berhasil dikembalikan');
+        return redirect()->route('admin.returns.index')->with('success', 'alat berhasil dikembalikan. Denda: RP ' . number_format($denda, 0, ',', '.') );
     }
 
     /**
@@ -97,7 +101,8 @@ class AdminReturnController extends Controller
         ]);
 
         $loan->update([
-            'tanggal_kembali_aktual' => $request->tanggal_kembali_aktual
+            'tanggal_kembali_aktual' => $request->tanggal_kembali_aktual,
+            'denda' => $loan->calculateDenda() //update denda jika tanggal berubah
         ]);
 
         return redirect()->route('admin.returns.index')->with('success', 'Data pengembalian berhasil diperbarui');
