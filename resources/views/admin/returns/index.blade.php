@@ -15,6 +15,7 @@
                         <th>Alat</th>
                         <th>Tgl Pinjam</th>
                         <th>Tgl Kembali (Aktual)</th>
+                        <th>Denda (Rp)</th>
                         <th>Petugas</th>
                         <th>Aksi</th>
                     </tr>
@@ -34,6 +35,7 @@
                                 <span class="badge bg-success">Tepat Waktu</span>
                             @endif
                         </td>
+                        <td>{{ $r->denda > 0 ? 'Rp ' . number_format($r->denda, 0, ',', '.') : 'Rp 0' }}</td>
                         <td>{{ $r->petugas ? $r->petugas->name : 'Admin' }}</td>
                         <td>
                             <a href="{{ route('admin.returns.edit', $r->id) }}" class="btn btn-warning btn-sm">Edit</a>
