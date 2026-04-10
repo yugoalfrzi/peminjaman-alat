@@ -9,10 +9,19 @@
                     + Tambah Kategori
                 </a>
             </div>
+            <div class="mb-3">
+                <form action="{{ route('categories.index') }}" method="GET" class="d-flex gap-2" style="max-width: 400px;">
+                    <input type="text" name="search" class="form-control" placeholder="Cari kategori" value="{{ request('search') }}">
+                    <button type="submit" class="btn btn-outline-primary">Cari</button>
+                    @if(request('search'))
+                        <a href="{{ route('categories.index') }}" class="btn btn-outline-danger btn-sm">Reset</a>
+                    @endif
+                </form>
+            </div>
             <div class="card">
                 <div class="card-body">
-                    <table class="table table-bordered table-striped">
-                        <thead class="table-dark">
+                    <table class="table table-bordered table-hover table-striped">
+                        <thead class="table-light">
                             <tr>
                                 <th width="10%">No</th>
                                 <th>Nama Kategori</th>

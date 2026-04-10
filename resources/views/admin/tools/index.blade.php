@@ -7,11 +7,21 @@
             + Tambah Alat Baru
         </a>
     </div>
+    <div class="mb-3">
+        <form action="{{ route('tools.index') }}" method="GET" class="d-flex gap-2" style="max-width: 400px">
+            <input type="text" name="search" class="form-control" placeholder="Cari alat" value="{{ request('search') }}">
+            <button type="submit" class="btn btn-outline-primary">Cari</button>
+        </form>
+        @if(request('search'))
+            <a href="{{ route('tools.index') }}" class="btn btn-outline-danger btn-sm">Reset</a>
+        @endif
+    </div>
+
     <div class="card">
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-bordered table-striped align-middle">
-                    <thead class="table-dark">
+                <table class="table table-bordered table-hover table-striped align-middle">
+                    <thead class="table-light">
                         <tr>
                             <th width="5%">No</th>
                             <th width="15%">Gambar</th>

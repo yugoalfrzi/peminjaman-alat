@@ -2,6 +2,15 @@
 
 @section('content')
     <h3>Daftar Alat Tersedia</h3>
+    <div class="mb-3">
+        <form action="{{ url('/peminjam/dashboard') }}" method="GET" class="d-flex gap-2" style="max-width: 400px">
+            <input type="text" name="search" class="form-control" placeholder="Cari alat" value="{{ request('search') }}">
+            <button type="submit" class="btn btn-secondary">Cari</button>
+            @if(request('search'))
+                <a href="{{ route('peminjam.dashboard') }}" class="btn btn-outline-secondary btn-sm">Reset</a>
+            @endif
+        </form>
+    </div>
     <div class="row mt-4">
         @foreach($tools as $tool)
             <div class="col-md-4 mb-4">

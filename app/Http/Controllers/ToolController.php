@@ -14,9 +14,16 @@ class ToolController extends Controller
      */
     public function index()
     {
+        //fitur pencarian sederhana
+        $query = Tool::query();
+
+        if ($search = request('search')) {
+            $query->where('nama_alat', 'like', "%$search%");
+        }
+
         // Mengambil data alat, diurutkan terbaru, dengan pagination 10 per halaman
         // with digunakan untuk eager loading relasi kategori agar query lebih ringan
-        $tools = Tool::with('category')->latest()->paginate(10);
+        $tools = $query->with('category')->latest()->paginate(10);
 
         return view('admin.tools.index', compact('tools'));
     }

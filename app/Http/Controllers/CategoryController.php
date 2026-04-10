@@ -13,8 +13,14 @@ class CategoryController extends Controller
      */
     public function index()
     {
+        $query = Category::withCount('tools');
+
+        if ($search = request('search')) {
+            $query->where('nama_kategori', 'like', "%$search%");
+        }
+
         //mengambil data kategori dan hitung jumlah alat didalamnya 
-        $categories = Category::withCount('tools')->latest()->paginate(10);
+        $categories = $query->latest()->paginate(10);
         return view('admin.categories.index', compact('categories'));
     }
 

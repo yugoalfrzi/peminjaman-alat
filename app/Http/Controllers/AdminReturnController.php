@@ -10,15 +10,36 @@ use App\Models\ActivityLog;
 class AdminReturnController extends Controller
 {
     //menampilkan riwayat pengembalian (history)
-    public function index()
+    public function index(Request $request)
     {
-        /**
-         * ambil dengan status 'kembali'
-         */
+        
+        $search = $request->get('search');
+
         $return = Loan::with(['user', 'tool'])
-            ->where('status', 'kembali')
+            ->where('status', 'kembali') // hanya data yang sudah kembali
+            ->when($search, function ($query, $search) {
+                return $query->where(function ($q) use ($search) {
+                    // Cari berdasarkan nama peminjam (relasi user)
+                    $q->whereHas('user', function ($sub) use ($search) {
+                        $sub->where('name', 'like', "%{$search}%");
+                    })
+                    // Atau berdasarkan nama alat (relasi tool)
+                    ->orWhereHas('tool', function ($sub) use ($search) {
+                        $sub->where('nama_alat', 'like', "%{$search}%");
+                    })
+                    // Atau berdasarkan tanggal pinjam
+                    ->orWhere('tanggal_pinjam', 'like', "%{$search}%")
+                    // Atau berdasarkan tanggal kembali aktual
+                    ->orWhere('tanggal_kembali_aktual', 'like', "%{$search}%")
+                    // Atau berdasarkan status (meskipun sudah 'kembali', tetap bisa)
+                    ->orWhere('status', 'like', "%{$search}%");
+                });
+            })
             ->latest('tanggal_kembali_aktual')
             ->paginate(10);
+
+        // Pertahankan keyword search saat pagination
+        $return->appends(['search' => $search]);
 
         return view('admin.returns.index', compact('return'));
     }

@@ -14,7 +14,19 @@ class AdminLoanController extends Controller
     //tampilkan semua data
     public function index()
     {
-        $loans = Loan::with(['user', 'tool'])->latest()->paginate(10);
+        $query = Loan::with(['user', 'tool']);
+
+        if ($search = request('search')) {
+            $query->where(function($q) use ($search) {
+                $q->whereHas('user', function($q) use ($search) {
+                    $q->where('name', 'like', "%$search%");
+                })->orWhereHas('tool', function($q) use ($search) {
+                    $q->where('nama_alat', 'like', "%$search%");
+                });
+            });
+        }
+
+        $loans = $query->latest()->paginate(10);
         return view('admin.loans.index', compact('loans'));
     }
 

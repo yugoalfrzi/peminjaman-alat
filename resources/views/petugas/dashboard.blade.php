@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="row justify-content-center">
-    <div class="card mb-4 shadow-sm border-0 rounded-4"> 
+    <div class="card mb-4 pb-4 shadow-sm border-0 rounded-4"> 
         <div class="card-header bg-white border-0 pt-4 pb-0">
             <h1>Dashboard Petugas</h1>
             <p class="text-muted">Selamat datang, {{ auth()->user()->name }}!</p>
@@ -46,7 +46,7 @@
             </div>
         </div>
     </div>
-    <div class="card mb-4 shadow-sm border-0 rounded-4">
+    <div class="card mb-4 pb-4  shadow-sm border-0 rounded-4">
         <h3 class="pt-4 pb-2">Daftar belum kembali</h3>
         <div class="card">
             <div class="card-header bg-info text-dark">Monitor Peminjaman</div>
@@ -100,7 +100,7 @@
             </div>
         </div>
     </div>
-    <div class="card mb-4 shadow-sm border-0 rounded-4">
+    <div class="card mb-4 pb-4 shadow-sm border-0 rounded-4">
         <h3 class="pt-4 pb-2">Daftar Sudah Dikembalikan</h3>
         <div class="card">
             <div class="card-header bg-success text-dark">Monitor Peminjaman</div>

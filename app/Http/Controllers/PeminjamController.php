@@ -11,7 +11,13 @@ use Illuminate\Support\Facades\Auth;
 class PeminjamController extends Controller
 {
     public function index() {
-        $tools = Tool::with('category')->get();
+        $query = Tool::with('category');
+
+        if ($search = request('search')) {
+            $query->where('nama_alat', 'like', "%$search%");
+        }
+
+        $tools = $query->get();
         return view('peminjam.dashboard', compact('tools'));
     }
 

@@ -5,10 +5,19 @@
         <h3>Data Pengembalian Alat</h3>
         <a href="{{ route('admin.returns.create') }}" class="btn btn-success">+ Proses Pengembalian Baru</a>
     </div>
+    <div class="mb-3">
+        <form action="{{ route('admin.returns.index') }}" method="GET" class="d-flex gap-2" style="max-width: 400px;">
+            <input type="text" name="search" class="form-control" placeholder="Cari nama peminjam atau alat..." value="{{ request('search') }}">
+            <button type="submit" class="btn btn-outline-primary">Cari</button>
+            @if(request('search'))
+                <a href="{{ route('admin.returns.index') }}" class="btn btn-outline-danger btn-sm">Reset</a>
+                @endif
+        </form>
+    </div>
     <div class="card">
         <div class="card-body">
-            <table class="table table-bordered table-striped">
-                <thead class="table-dark">
+            <table class="table table-bordered table-hover table-striped">
+                <thead class="table-light">
                     <tr>
                         <th>No</th>
                         <th>Peminjam</th>

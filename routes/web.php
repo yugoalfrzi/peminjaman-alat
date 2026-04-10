@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminLoanController;
 use App\Http\Controllers\AdminReturnController;
@@ -30,6 +31,10 @@ Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+// Registrasi peminjam
+Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
+Route::post('/register', [RegisterController::class, 'register']);
+
 // Group Admin (CRUD User, Alat, Kategori, Log)
 Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/dashboard', [AdminController::class, 'index']);
@@ -55,7 +60,7 @@ Route::middleware(['auth', 'role:petugas'])->group(function () {
 
 // Group Peminjam (Lihat alat, Ajukan pinjam)
 Route::middleware(['auth', 'role:peminjam'])->group(function () {
-    Route::get('/peminjam/dashboard', [PeminjamController::class, 'index']); // Daftar Alat
+    Route::get('/peminjam/dashboard', [PeminjamController::class, 'index'])->name('peminjam.dashboard'); // Daftar Alat
     Route::post('/peminjam/ajukan', [PeminjamController::class, 'store']); // Mengajukan
     Route::get('/peminjam/riwayat', [PeminjamController::class, 'history']); // Riwayat & Kembalikan
 });

@@ -42,6 +42,10 @@
                             <i class="fas fa-arrow-right-to-bracket me-2"></i> Masuk
                         </button>
                     </div>
+
+                    <div class="d-grid gap-2 mt-3 text-center">
+                        <a href="{{ route('register') }}">Belum punya akun? Daftar</a>
+                    </div>
                 </form>
             </div>
         </div>
