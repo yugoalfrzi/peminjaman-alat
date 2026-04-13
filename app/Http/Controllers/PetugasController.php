@@ -7,6 +7,7 @@ use App\Models\Tool;
 use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 
 class PetugasController extends Controller
@@ -46,6 +47,7 @@ class PetugasController extends Controller
     {
         $request->validate([
             'tanggal_kembali_aktual' => 'required|date',
+            'proof_photo' => 'required|image|mimes:jpeg,png,jpg|max:2048', // validasi foto
         ]);
     
         $loan = Loan::findOrFail($id);
@@ -54,20 +56,23 @@ class PetugasController extends Controller
             return back()->with('error', 'Peminjaman tidak valid atau sudah dikembalikan.');
         }
     
+        // handle file foto
+        $proof_photo = null;
+        if ($request->hasFile('proof_photo')) {
+            $proof_photo = $request->file('proof_photo')->store('returns', 'public');
+            $loan->proof_photo = $proof_photo; // Tambah
+            $loan->save();
+        }
+
+    
         $tanggalAktual = Carbon::parse($request->tanggal_kembali_aktual);
-        
-        // Simpan tanggal aktual
         $loan->tanggal_kembali_aktual = $tanggalAktual;
-        
-        // Hitung denda (method sudah benar)
         $denda = $loan->calculateDenda();
-        
-        // Update status, tanggal aktual, dan denda
         $loan->status = 'kembali';
         $loan->denda = $denda;
         $loan->save();
     
-        // Kembalikan stok alat
+        // Kembalikan stok
         $tool = Tool::find($loan->tool_id);
         if ($tool) {
             $tool->increment('stok');
@@ -75,7 +80,7 @@ class PetugasController extends Controller
     
         // Catat aktivitas (opsional)
         if (class_exists(ActivityLog::class)) {
-            ActivityLog::record('Pengembalian (Petugas)', 'Memproses pengembalian alat: ' . ($loan->tool->nama_alat ?? '-') . ' dengan denda Rp ' . number_format($denda, 0, ',', '.'));
+            ActivityLog::record('Pengembalian (Petugas)', 'Memproses pengembalian alat: ' . ($loan->tool->nama_alat ?? '-') . ' dengan denda Rp ' . number_format($denda, 0, ',', '.') . '. Foto bukti: ' . $proof_photo);
         }
     
         return back()->with('success', 'Alat telah dikembalikan. Denda: Rp ' . number_format($denda, 0, ',', '.'));

@@ -2,11 +2,11 @@
 
 @section('content')
 <div class="row justify-content-center">
+    <div class="border-0 pt-4 pb-0">
+        <h1>Dashboard Petugas</h1>
+        <p class="text-muted">Selamat datang, {{ auth()->user()->name }}!</p>
+    </div>
     <div class="card mb-4 pb-4 shadow-sm border-0 rounded-4"> 
-        <div class="card-header bg-white border-0 pt-4 pb-0">
-            <h1>Dashboard Petugas</h1>
-            <p class="text-muted">Selamat datang, {{ auth()->user()->name }}!</p>
-        </div>
         <h3 class="pt-4 pb-2">Permintaan Peminjaman Masuk</h3>
         <div class="card">
             <div class="card-header bg-warning text-dark">Menunggu Persetujuan</div>
@@ -46,8 +46,8 @@
             </div>
         </div>
     </div>
-    <div class="card mb-4 pb-4  shadow-sm border-0 rounded-4">
-        <h3 class="pt-4 pb-2">Daftar belum kembali</h3>
+    <div class="card mb-4 pb-4 shadow-sm border-0 rounded-4">
+        <h3 class="pt-4 pb-2">Daftar sedang dipinjam</h3>
         <div class="card">
             <div class="card-header bg-info text-dark">Monitor Peminjaman</div>
             <div class="card-body">
@@ -76,16 +76,19 @@
                                     <td>
                                         <input type="date" name="tanggal_kembali_aktual" class="form-control form-control-sm tgl-aktual" 
                                                data-id="{{ $active->id }}"
-                                               value="{{ date('Y-m-d') }}" required>
+                                               value="{{ date('Y-m-d') }}">
                                     </td>
                                     <td class="denda-display" id="denda-{{ $active->id }}">
                                         <span class="text-muted">Rp 0</span>
                                     </td>
                                     <td>
-                                        <form action="{{ url('/petugas/return/'.$active->id) }}" method="POST" class="return-form">
+                                        <form action="{{ url('/petugas/return/'.$active->id) }}" method="POST" class="return-form" enctype="multipart/form-data">
                                             @csrf
+                                            <input type="file" name="proof_photo" accept="image/*" required>
+                                            <small class="d-block">Upload bukti pengembalian</small>
+
                                             <input type="hidden" name="tanggal_kembali_aktual" class="hidden-tgl" value="">
-                                            <button type="submit" class="btn btn-primary btn-sm">Proses Kembali</button>
+                                            <button type="submit" class="btn btn-primary btn-sm mt-2">Proses Kembali</button>
                                         </form>
                                     </td>
                                 </tr>
@@ -114,6 +117,7 @@
                                 <th>Status</th>
                                 <th>Tanggal Kembali Aktual</th>
                                 <th>Denda (Rp)</th>
+                                <th>Bukti</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -130,10 +134,19 @@
                                             <span class="text-muted">Rp 0</span>
                                         @endif
                                     </td>
+                                    <td>
+                                        @if($sudah->proof_photo)
+                                            <a href="{{ asset('storage/' . $sudah->proof_photo) }}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                                Lihat Bukti
+                                            </a>
+                                        @else
+                                            <span class="text-muted">Tidak ada bukti</span>
+                                        @endif
+                                    </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7  " class="text-center text-muted">Tidak ada data</td>
+                                    <td colspan="7" class="text-center text-muted">Tidak ada data</td>
                                 </tr>
                             @endforelse
                         </tbody>

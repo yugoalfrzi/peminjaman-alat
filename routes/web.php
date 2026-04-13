@@ -25,7 +25,7 @@ Route::get('/', function () {
     }
     // Jika belum login, tampilkan halaman welcome
     return view('welcome');
-})->name('home');
+})->name('home');   
 
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
@@ -63,4 +63,9 @@ Route::middleware(['auth', 'role:peminjam'])->group(function () {
     Route::get('/peminjam/dashboard', [PeminjamController::class, 'index'])->name('peminjam.dashboard'); // Daftar Alat
     Route::post('/peminjam/ajukan', [PeminjamController::class, 'store']); // Mengajukan
     Route::get('/peminjam/riwayat', [PeminjamController::class, 'history']); // Riwayat & Kembalikan
+});
+
+Route::middleware(['auth', 'role:peminjam'])->group(function () {
+    Route::get('/peminjam/multi/create', [PeminjamController::class, 'createMulti'])->name('peminjam.multi.create');
+    Route::post('/peminjam/multi/store', [PeminjamController::class, 'storeMulti'])->name('peminjam.multi.store');
 });

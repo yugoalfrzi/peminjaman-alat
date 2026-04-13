@@ -10,15 +10,34 @@ use Illuminate\Support\Facades\Auth;
 
 class PeminjamController extends Controller
 {
-    public function index() {
-        $query = Tool::with('category');
+    public function index(Request $request) {
 
-        if ($search = request('search')) {
-            $query->where('nama_alat', 'like', "%$search%");
+        $search = $request->get('search');
+    
+        $query = Tool::with('category'); // eager loading kategori
+        
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nama_alat', 'like', "%{$search}%")
+                  ->orWhereHas('category', function ($q2) use ($search) {
+                      $q2->where('nama_kategori', 'like', "%{$search}%");
+                  });
+            });
         }
-
-        $tools = $query->get();
+        
+        $tools = $query->get(); // atau paginate()
+        
         return view('peminjam.dashboard', compact('tools'));
+    }
+
+    /**
+     * form create untuk peminjaman multi alat
+     */
+    public function createMulti() 
+    {
+        $tools = Tool::where('stok', '>', 0)->get(); 
+        
+        return view('peminjam.multi_pinjam', compact('tools'));
     }
 
     public function store(Request $request) {
@@ -37,6 +56,57 @@ class PeminjamController extends Controller
 
             // Opsional: Kurangi stok langsung atau saat disetujui (tergantung logika bisnis)
             return back()->with('success', 'Pengajuan berhasil, menunggu persetujuan.');
+        }
+    }
+
+    /**
+     * form untuk proses peminjaman multi alat
+     */
+    public function storeMulti(Request $request)
+    {
+        $request->validate([
+            'items' => 'required|array|min:1',
+            'items.*.tool_id' => 'required|exists:tools,id',
+            'items.*.tanggal_pinjam' => 'required|date|after_or_equal:today',
+            'items.*.tanggal_kembali_rencana' => 'required|date|after_or_equal:items.*.tanggal_pinjam',
+        ]);
+
+        $user = Auth::user();
+        $successCount = 0;
+        $errors = [];
+
+        foreach ($request->items as $item) {
+            $tool = Tool::find($item['tool_id']);
+
+            // Validasi stok ulang (jaga-jaga ada perubahan stok saat proses)
+            if ($tool->stok <= 0) {
+                $errors[] = "Stok alat '{$tool->nama_alat}' habis, tidak bisa dipinjam.";
+                continue;
+            }
+
+            // Simpan peminjaman
+            Loan::create([
+                'user_id' => $user->id,
+                'tool_id' => $tool->id,
+                'tanggal_pinjam' => $item['tanggal_pinjam'],
+                'tanggal_kembali_rencana' => $item['tanggal_kembali_rencana'],
+                'status' => 'pending', // sesuai kolom status di tabel loans
+            ]);
+
+            // Catat activity log (optional, bisa disesuaikan)
+            ActivityLog::record('Pengajuan Peminjaman', "Mengajukan peminjaman alat: {$tool->nama_alat}");
+
+            $successCount++;
+        }
+
+        if ($successCount > 0 && empty($errors)) {
+            return redirect()->route('peminjam.dashboard')
+                ->with('success', "Berhasil mengajukan {$successCount} peminjaman. Menunggu persetujuan.");
+        } elseif ($successCount > 0 && !empty($errors)) {
+            return redirect()->route('peminjam.dashboard')
+                ->with('warning', "Berhasil mengajukan {$successCount} peminjaman, namun ada beberapa gagal: " . implode(' ', $errors));
+        } else {
+            return back()->withErrors($errors)->withInput();
         }
     }
 
