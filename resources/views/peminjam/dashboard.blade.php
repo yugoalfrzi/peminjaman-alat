@@ -36,7 +36,7 @@
                 <div class="col-md-4 mb-4">
                     <div class="card h-100">
                         @if($tool->gambar)
-                            <img src="{{ asset('storage/'.$tool->gambar) }}" class="card-img-top" alt="{{ $tool->nama_alat }}" style="height: 200px; object-fit: cover;">
+                            <img src="{{ asset('storage/' . $tool->gambar) }}" class="card-img-top" alt="{{ $tool->nama_alat }}" style="height: 200px; object-fit: cover;">
                         @else
                             <img src="{{ asset('images/default-tool.png') }}" class="card-img-top" alt="Default" style="height: 200px; object-fit: cover;">
                         @endif
