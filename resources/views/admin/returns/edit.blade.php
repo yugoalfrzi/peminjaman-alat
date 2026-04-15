@@ -2,10 +2,10 @@
 
 @section('content')
     <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header fw-bold">Edit Data Pengembalian</div>
-                <div class="card-body">
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-header fw-bold bg-white py-3">Edit Data Pengembalian</div>
+                <div class="card-body p-4">
                     <form action="{{ route('admin.returns.update', $loan->id) }}" method="POST">
                         @csrf
                         @method('PUT')
@@ -22,7 +22,7 @@
                             <input type="date" name="tanggal_kembali_aktual" class="form-control" value="{{ $loan->tanggal_kembali_aktual }}" required>
                             <small class="text-muted">Ubah tanggal ini jika admin salah input waktu pengembalian.</small>
                         </div>
-                        <div class="d-flex justify-content-between">
+                        <div class="d-flex justify-content-between gap-2">
                             <a href="{{ route('admin.returns.index') }}" class="btn btn-secondary">Batal</a>
                             <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
                         </div>

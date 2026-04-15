@@ -1,10 +1,12 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="card col-md-8 mx-auto">
-        <div class="card-header fw-bold">Tambah Peminjaman Manual</div>
-        <div class="card-body">
-            <form action="{{ route('admin.loans.store') }}" method="POST">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-header fw-bold bg-white py-3">Tambah Peminjaman Manual</div>
+                <div class="card-body p-4">
+                    <form action="{{ route('admin.loans.store') }}" method="POST">
                 @csrf
                 <div class="mb-3">
                     <label>Pilih Peminjam</label>
@@ -24,6 +26,10 @@
                         @endforeach
                     </select>
                 </div>
+                <div class="mb-3">
+                    <label>Jumlah</label>
+                    <input type="number" name="jumlah" class="form-control" min="1" value="{{ old('jumlah', 1) }}" required>
+                </div>
                 <div class="row mb-3">
                     <div class="col">
                         <label>Tgl Pinjam</label>
@@ -42,9 +48,13 @@
                         <option value="kembali">Sudah Kembali (Hanya Catat Riwayat)</option>
                     </select>
                 </div>
-                <button class="btn btn-primary">Simpan Data</button>
-                <a href="{{ route('admin.loans.index') }}" class="btn btn-secondary">Batal</a>
-            </form>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary">Simpan Data</button>
+                    <a href="{{ route('admin.loans.index') }}" class="btn btn-secondary">Batal</a>
+                </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 @endsection

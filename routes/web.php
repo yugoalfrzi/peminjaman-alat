@@ -44,7 +44,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('admin/loans', AdminLoanController::class)->names('admin.loans');
     Route::resource('admin/returns', AdminReturnController::class)->names('admin.returns');
     Route::get('/admin/logs', function() {
-        $logs = ActivityLog::with('user')->latest()->get();
+        $logs = ActivityLog::with('user')->orderBy('created_at')->get();
         return view('admin.logs', compact('logs'));
     });
     // CRUD Peminjaman (Admin bisa full akses)
@@ -64,9 +64,4 @@ Route::middleware(['auth', 'role:peminjam'])->group(function () {
     Route::get('/peminjam/dashboard', [PeminjamController::class, 'index'])->name('peminjam.dashboard'); // Daftar Alat
     Route::post('/peminjam/ajukan', [PeminjamController::class, 'store']); // Mengajukan
     Route::get('/peminjam/riwayat', [PeminjamController::class, 'history']); // Riwayat & Kembalikan
-});
-
-Route::middleware(['auth', 'role:peminjam'])->group(function () {
-    Route::get('/peminjam/multi/create', [PeminjamController::class, 'createMulti'])->name('peminjam.multi.create');
-    Route::post('/peminjam/multi/store', [PeminjamController::class, 'storeMulti'])->name('peminjam.multi.store');
 });

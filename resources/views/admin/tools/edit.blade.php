@@ -1,12 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header fw-bold">Edit Data Alat</div>
-                    <div class="card-body">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-header fw-bold bg-white py-3">Edit Data Alat</div>
+                <div class="card-body p-4">
                         <form action="{{ route('tools.update', $tool->id) }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             @method('PUT')
@@ -51,12 +50,11 @@
                                 <label class="form-label">Deskripsi</label>
                                 <textarea name="deskripsi" class="form-control" rows="3">{{ old('deskripsi', $tool->deskripsi) }}</textarea>
                             </div>
-                            <div class="d-flex justify-content-between">
+                            <div class="d-flex justify-content-between gap-2">
                                 <a href="{{ route('tools.index') }}" class="btn btn-secondary">Batal</a>
                                 <button type="submit" class="btn btn-success">Update Data</button>
                             </div>
                         </form>
-                    </div>
                 </div>
             </div>
         </div>

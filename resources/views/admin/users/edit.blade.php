@@ -2,10 +2,10 @@
 
 @section('content')
     <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header fw-bold">Edit User: {{ $user->name }}</div>
-                <div class="card-body">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-header fw-bold bg-white py-3">Edit User: {{ $user->name }}</div>
+                <div class="card-body p-4">
                     <form action="{{ route('users.update', $user->id) }}" method="POST">
                         @csrf
                         @method('PUT')
@@ -37,7 +37,7 @@
                             @error('password') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 
-                        <div class="d-flex justify-content-between mt-4">
+                        <div class="d-flex justify-content-between gap-2 mt-4">
                             <a href="{{ route('users.index') }}" class="btn btn-secondary">Batal</a>
                             <button type="submit" class="btn btn-success">Update User</button>
                         </div>

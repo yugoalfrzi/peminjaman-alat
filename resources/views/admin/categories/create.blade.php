@@ -2,10 +2,10 @@
 
 @section('content')
     <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header fw-bold">Tambah Kategori</div>
-                <div class="card-body">
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-header fw-bold bg-white py-3">Tambah Kategori</div>
+                <div class="card-body p-4">
                     <form action="{{ route('categories.store') }}" method="POST">
                         @csrf
                         <div class="mb-3">
@@ -15,7 +15,7 @@
                             <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>      
-                        <div class="d-flex justify-content-between">
+                        <div class="d-flex justify-content-between gap-2">
                             <a href="{{ route('categories.index') }}" class="btn btn-secondary">Batal</a>
                             <button type="submit" class="btn btn-primary">Simpan</button>
                         </div>

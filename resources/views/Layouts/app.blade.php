@@ -17,7 +17,12 @@
 
         body {
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            background: #f4f9fe;  
+            background: linear-gradient(135deg, rgba(244, 249, 254, 0.9), rgba(31, 59, 76, 0.1)), 
+                        url('{{ asset('images/SIPINJAM.png') }}');
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-size: cover;
+            background-attachment: fixed;
             color: #1f3b4c;
             line-height: 1.5;
         }

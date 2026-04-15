@@ -89,7 +89,7 @@ class AdminReturnController extends Controller
     
         // Kembalikan stok
         $tool = Tool::findOrFail($loan->tool_id);
-        $tool->increment('stok');
+        $tool->increment('stok', $loan->jumlah ?? 1);
     
         ActivityLog::record('Pengembalian (Admin)', 'Memproses pengembalian alat: ' . $loan->tool->nama_alat . ' dengan denda Rp ' . number_format($denda, 0, ',', '.'));
     

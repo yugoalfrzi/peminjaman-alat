@@ -1,10 +1,12 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="card col-md-8 mx-auto">
-        <div class="card-header fw-bold">Edit Peminjaman #{{ $loan->id }}</div>
-        <div class="card-body">
-            <form action="{{ route('admin.loans.update', $loan->id) }}" method="POST">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-header fw-bold bg-white py-3">Edit Peminjaman #{{ $loan->id }}</div>
+                <div class="card-body p-4">
+                    <form action="{{ route('admin.loans.update', $loan->id) }}" method="POST">
                 @csrf
                 @method('PUT')
                 <div class="mb-3">
@@ -28,24 +30,8 @@
                     </select>
                 </div>
                 <div class="mb-3">
-                    <label>Alat</label>
-                    <select name="tool_id" class="form-select">
-                        @foreach($tools as $tool)
-                            <option value="{{ $tool->id }}" {{ $loan->tool_id == $tool->id ? 'selected' : '' }}>
-                                {{ $tool->nama_alat }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label>Alat</label>
-                    <select name="tool_id" class="form-select">
-                        @foreach($tools as $tool)
-                            <option value="{{ $tool->id }}" {{ $loan->tool_id == $tool->id ? 'selected' : '' }}>
-                                {{ $tool->nama_alat }}
-                            </option>
-                        @endforeach
-                    </select>
+                    <label>Jumlah</label>
+                    <input type="number" name="jumlah" class="form-control" min="1" value="{{ old('jumlah', $loan->jumlah ?? 1) }}" required>
                 </div>
                 <div class="row mb-3">
                     <div class="col">
@@ -67,9 +53,13 @@
                     </select>
                     <small class="text-danger">*Mengubah status 'Disetujui' ke 'Kembali' akan menambah stok otomatis.</small>
                 </div>
-                <button class="btn btn-success">Update Data</button>
-                <a href="{{ route('admin.loans.index') }}" class="btn btn-secondary">Batal</a>
-            </form>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-success">Update Data</button>
+                    <a href="{{ route('admin.loans.index') }}" class="btn btn-secondary">Batal</a>
+                </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 @endsection

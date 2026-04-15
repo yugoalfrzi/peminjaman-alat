@@ -32,96 +32,54 @@ class PeminjamController extends Controller
         return view('peminjam.dashboard', compact('tools'));
     }
 
-    /**
-     * form create untuk peminjaman multi alat
-     */
-    public function createMulti() 
-    {
-        $tools = Tool::where('stok', '>', 0)->get(); 
-        
-        return view('peminjam.multi_pinjam', compact('tools'));
-    }
-
     public function store(Request $request) {
-        // Cek stok dulu
-        $tool = Tool::find($request->tool_id);
-        if($tool->stok > 0) {
-            Loan::create([
-                'user_id' => Auth::id(),
-                'tool_id' => $request->tool_id,
-                'tanggal_pinjam' => now(),
-                'tanggal_kembali_rencana' => $request->tanggal_kembali_rencana,
-                'status' => 'pending'
-            ]);
-
-            ActivityLog::record('Tambah Alat', 'Menambahkan alat baru: ' . $request->nama_alat);
-
-            // Opsional: Kurangi stok langsung atau saat disetujui (tergantung logika bisnis)
-            return back()->with('success', 'Pengajuan berhasil, menunggu persetujuan.');
-        }
-    }
-
-    /**
-     * form untuk proses peminjaman multi alat
-     */
-    public function storeMulti(Request $request)
-    {
         $request->validate([
             'items' => 'required|array|min:1',
             'items.*.tool_id' => 'required|exists:tools,id',
-            'items.*.jumlah' => 'required|integer|min:0',          
+            'items.*.jumlah' => 'required|integer|min:1',
             'items.*.tanggal_pinjam' => 'required|date|after_or_equal:today',
-            'items.*.tanggal_kembali_rencana' => 'required|date|after_or_equal:items.*.tanggal_pinjam',
+            'items.*.tanggal_kembali_rencana' => 'required|date',
         ]);
 
         $user = Auth::user();
         $successCount = 0;
         $errors = [];
 
-        // Gunakan DB::transaction agar konsisten
         DB::beginTransaction();
-
         try {
             foreach ($request->items as $item) {
-                $tool = Tool::find($item['tool_id']);
+                $tool = Tool::findOrFail($item['tool_id']);
+                if ($item['tanggal_kembali_rencana'] < $item['tanggal_pinjam']) {
+                    $errors[] = "Tanggal rencana kembali untuk alat '{$tool->nama_alat}' tidak boleh sebelum tanggal pinjam.";
+                    continue;
+                }
 
-                // Validasi stok berdasarkan jumlah yang diminta
                 if ($tool->stok < $item['jumlah']) {
                     $errors[] = "Stok alat '{$tool->nama_alat}' tidak mencukupi (tersedia {$tool->stok}, diminta {$item['jumlah']}).";
                     continue;
                 }
 
-                // Simpan peminjaman dengan jumlah
                 Loan::create([
                     'user_id' => $user->id,
                     'tool_id' => $tool->id,
-                    'jumlah' => $item['jumlah'],                     // simpan jumlah
+                    'jumlah' => $item['jumlah'],
                     'tanggal_pinjam' => $item['tanggal_pinjam'],
                     'tanggal_kembali_rencana' => $item['tanggal_kembali_rencana'],
-                    'status' => 'pending',
+                    'status' => 'pending'
                 ]);
 
-                // Kurangi stok alat sesuai jumlah
-                $tool->stok -= $item['jumlah'];
-                $tool->save();
-
-                // Activity log
+                $tool->decrement('stok', $item['jumlah']);
                 ActivityLog::record('Pengajuan Peminjaman', "Mengajukan peminjaman {$item['jumlah']} unit alat: {$tool->nama_alat}");
-
                 $successCount++;
             }
 
-            // Jika ada error, rollback semua perubahan (karena transaksi)
             if (!empty($errors)) {
                 DB::rollBack();
                 return back()->withErrors($errors)->withInput();
             }
 
             DB::commit();
-
-            return redirect()->route('peminjam.dashboard')
-                ->with('success', "Berhasil mengajukan {$successCount} peminjaman. Menunggu persetujuan.");
-
+            return back()->with('success', "Pengajuan {$successCount} alat berhasil, menunggu persetujuan.");
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->withErrors(['Terjadi kesalahan: ' . $e->getMessage()])->withInput();

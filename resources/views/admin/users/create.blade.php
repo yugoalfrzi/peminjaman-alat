@@ -2,10 +2,10 @@
 
 @section('content')
     <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header fw-bold">Tambah User Baru</div>
-                <div class="card-body">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-header fw-bold bg-white py-3">Tambah User Baru</div>
+                <div class="card-body p-4">
                     <form action="{{ route('users.store') }}" method="POST">
                         @csrf
                         <div class="mb-3">
@@ -33,7 +33,7 @@
                             <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" required minlength="6">
                             @error('password') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
-                        <div class="d-flex justify-content-between mt-4">
+                        <div class="d-flex justify-content-between gap-2 mt-4">
                             <a href="{{ route('users.index') }}" class="btn btn-secondary">Batal</a>
                             <button type="submit" class="btn btn-primary">Simpan User</button>
                         </div>

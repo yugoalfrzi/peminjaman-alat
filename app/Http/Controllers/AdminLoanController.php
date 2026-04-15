@@ -47,6 +47,7 @@ class AdminLoanController extends Controller
         $request->validate([
             'user_id' => 'required',
             'tool_id' => 'required',
+            'jumlah' => 'required|integer|min:1',
             'tanggal_pinjam' => 'required|date',
             'tanggal_kembali_rencana' => 'required|date|after_or_equal:tanggal_pinjam',
             'status' => 'required'
@@ -54,13 +55,14 @@ class AdminLoanController extends Controller
         
         // cek stok jika status langsung disetujui
         $tool = Tool::findOrFail($request->tool_id);
-        if($request->status == 'disetujui' && $tool->stok < 1) {
-            return back()->with(['error' => 'Stok alat kosong, tidak bisa set status disetujui.']);
+        if($request->status == 'disetujui' && $tool->stok < $request->jumlah) {
+            return back()->with(['error' => "Stok alat tidak cukup. Tersedia {$tool->stok}, diminta {$request->jumlah}."]);
         }
 
         Loan::create([
             'user_id' => $request->user_id,
             'tool_id' => $request->tool_id,
+            'jumlah' => $request->jumlah,
             'tanggal_pinjam' => $request->tanggal_pinjam,
             'tanggal_kembali_rencana' => $request->tanggal_kembali_rencana,
             'status' => $request->status,
@@ -69,7 +71,7 @@ class AdminLoanController extends Controller
 
         // kurangi stok jika admin langsung set disetujui
         if ($request->status == 'disetujui') {
-            $tool->decrement('stok');
+            $tool->decrement('stok', $request->jumlah);
         }
 
         ActivityLog::record('Create Loan', 'Admin membuat data pinjaman baru');
@@ -90,29 +92,44 @@ class AdminLoanController extends Controller
     // update data (simpan perubahan)
     public function update(Request $request, $id)
     {
+        $request->validate([
+            'user_id' => 'required',
+            'tool_id' => 'required',
+            'jumlah' => 'required|integer|min:1',
+            'tanggal_pinjam' => 'required|date',
+            'tanggal_kembali_rencana' => 'required|date|after_or_equal:tanggal_pinjam',
+            'status' => 'required'
+        ]);
+
         $loan = Loan::findOrFail($id);
         $tool = Tool::findOrFail($request->tool_id);
+        $jumlahBaru = (int) $request->jumlah;
+        $jumlahLama = (int) ($loan->jumlah ?? 1);
 
         // Logika perubahan stok berdasarkan perubahan status
         // 1. jika sebelumnya pending -> diubah menjadi disetujui (stok berkurang)
         if ($loan->status == 'pending' && $request->status == 'disetujui') {
-            $tool->decrement('stok');
+            if ($tool->stok < $jumlahBaru) {
+                return back()->with(['error' => "Stok alat tidak cukup. Tersedia {$tool->stok}, diminta {$jumlahBaru}."]);
+            }
+            $tool->decrement('stok', $jumlahBaru);
         }
 
         //2. jika sebelumnya disetujui -> diubah menjadi kembali (stok bertambah)
         elseif ($loan->status == 'disetujui' && $request->status == 'kembali') {
-            $tool->increment('stok');
+            $tool->increment('stok', $jumlahLama);
             $request->merge(['tanggal_kembali_aktual' => now()]);
         }
 
         //3. jika sebelumnya disetujui -> diubah jadi pending/batal (stok bertambah/koreksi)
         elseif ($loan->status == 'disetujui' && $request->status == 'pending') {
-            $tool->increment('stok');
+            $tool->increment('stok', $jumlahLama);
         }
 
         $loan->update([
             'user_id' => $request->user_id,
             'tool_id' => $request->tool_id,
+            'jumlah' => $jumlahBaru,
             'tanggal_pinjam' => $request->tanggal_pinjam,
             'tanggal_kembali_rencana' => $request->tanggal_kembali_rencana,
             'status' => $request->status,
@@ -129,7 +146,7 @@ class AdminLoanController extends Controller
 
         //jika menghapus data yang statusnya masih disetujui (sedang dipinjam), kembalikan stok 
         if ($loan->status == 'disetujui'){
-            $loan->tool->increment('stok');
+            $loan->tool->increment('stok', $loan->jumlah ?? 1);
         }
 
         $loan->delete();
