@@ -34,12 +34,6 @@ class PetugasController extends Controller
             'petugas_id' => Auth::id()
         ]);
 
-        // Kurangi stok alat
-        $tool = Tool::find($loan->tool_id);
-        if ($tool) {
-            $tool->decrement('stok');
-        }
-
         return back()->with('success', 'Peminjaman disetujui.');
     }
 
@@ -92,4 +86,30 @@ class PetugasController extends Controller
         $loans = Loan::with(['user', 'tool'])->get();
         return view('petugas.laporan', compact('loans'));
     }
+
+    public function reject($id)
+{
+    $loan = Loan::findOrFail($id);
+
+    // memastikan hanya status pending yang bisa ditolak
+    if ($loan->status !== 'pending') {
+        return back()->with('error', 'Peminjaman tidak dapat ditolak karena sudah diproses.');
+    }
+
+    // Kembalikan stok alat (karena sebelumnya sudah dikurangi saat pengajuan)
+    $tool = Tool::find($loan->tool_id);
+    if ($tool) {
+        $tool->increment('stok', $loan->jumlah ?? 1); // asumsikan ada kolom jumlah
+    }
+
+    // Ubah status menjadi ditolak
+    $loan->update([
+        'status' => 'ditolak',
+        'petugas_id' => Auth::id()
+    ]);
+
+    ActivityLog::record('Penolakan Peminjaman', "Peminjaman alat {$loan->tool->nama_alat} oleh {$loan->user->name} ditolak.");
+
+    return back()->with('success', 'Peminjaman ditolak.');
+}
 }

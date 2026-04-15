@@ -37,7 +37,7 @@
                             <td>{{ $tools->firstItem() + $key }}</td>
                             <td>
                                 @if($tool->gambar)
-                                    <img src="{{ asset('storage/' . $tool->gambar) }}" alt="img" class="img-thumbnail" style="height: 60px;">
+                                <img src="{{ asset('storage/' . $tool->gambar) }}" alt="img" class="img-thumbnail" style="height: 60px;">
                                 @else
                                     <span class="text-muted small">No Image</span>
                                 @endif

@@ -37,7 +37,7 @@
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">Ganti Gambar (Opsional)</label>
-                                    <input type="file" name="gambar" class="form-control @error('gambar') is-invalid @enderror" accept="image/*">
+                                    
                                     @if($tool->gambar)
                                         <div class="mt-2">
                                             <small class="text-muted d-block mb-1">Gambar Saat Ini:</small>

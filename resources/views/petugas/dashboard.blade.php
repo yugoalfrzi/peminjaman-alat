@@ -27,6 +27,7 @@
                                 <tr>
                                     <td>{{ $loan->user->name }}</td>
                                     <td>{{ $loan->tool->nama_alat }}</td>
+                                    <td>{{ }}</td>
                                     <td>{{ $loan->tanggal_pinjam }}</td>
                                     <td>{{ $loan->tanggal_kembali_rencana }}</td>
                                     <td>
@@ -34,7 +35,10 @@
                                             @csrf
                                             <button class="btn btn-success btn-sm">Setujui</button>
                                         </form>
-                                        <button class="btn btn-danger btn-sm">Tolak</button>
+                                        <form action="{{ url('/petugas/reject/' .$loan->id) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <button class="btn btn-danger btn-sm">Tolak</button>
+                                        </form>
                                     </td>
                                 </tr>
                                 @empty
@@ -60,6 +64,7 @@
                                 <th>Status</th>
                                 <th>Rencana Kembali</th>
                                 <th>Tanggal Kembali Aktual</th>
+                                <th>Jumlah</th>
                                 <th>Denda (Rp)</th>
                                 <th>Aksi</th>
                             </tr>
@@ -78,6 +83,7 @@
                                                data-id="{{ $active->id }}"
                                                value="{{ date('Y-m-d') }}">
                                     </td>
+                                    <td>{{ $active->jumlah }}</td>
                                     <td class="denda-display" id="denda-{{ $active->id }}">
                                         <span class="text-muted">Rp 0</span>
                                     </td>
@@ -94,7 +100,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" class="text-center">Tidak ada data</td>
+                                    <td colspan="8" class="text-center">Tidak ada data</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -116,6 +122,7 @@
                                 <th>Alat</th>
                                 <th>Status</th>
                                 <th>Tanggal Kembali Aktual</th>
+                                <th>Jumlah</th>
                                 <th>Denda (Rp)</th>
                                 <th>Bukti</th>
                             </tr>
@@ -127,6 +134,7 @@
                                     <td>{{ $sudah->tool->nama_alat }}</td>
                                     <td><span class="badge bg-success">Sudah Kembali</span></td>
                                     <td>{{ $sudah->tanggal_kembali_aktual ? $sudah->tanggal_kembali_aktual->format('d-m-Y') : '-' }}</td>
+                                    <td>{{ $sudah->jumlah }}</td>   
                                     <td>
                                         @if($sudah->denda > 0)
                                             <span class="text-danger fw-bold">Rp {{ number_format($sudah->denda, 0, ',', '.') }}</span>

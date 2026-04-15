@@ -7,6 +7,8 @@ use App\Models\Loan;
 use App\Models\Tool;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+
 
 class PeminjamController extends Controller
 {
@@ -67,6 +69,7 @@ class PeminjamController extends Controller
         $request->validate([
             'items' => 'required|array|min:1',
             'items.*.tool_id' => 'required|exists:tools,id',
+            'items.*.jumlah' => 'required|integer|min:0',          
             'items.*.tanggal_pinjam' => 'required|date|after_or_equal:today',
             'items.*.tanggal_kembali_rencana' => 'required|date|after_or_equal:items.*.tanggal_pinjam',
         ]);
@@ -75,38 +78,53 @@ class PeminjamController extends Controller
         $successCount = 0;
         $errors = [];
 
-        foreach ($request->items as $item) {
-            $tool = Tool::find($item['tool_id']);
+        // Gunakan DB::transaction agar konsisten
+        DB::beginTransaction();
 
-            // Validasi stok ulang (jaga-jaga ada perubahan stok saat proses)
-            if ($tool->stok <= 0) {
-                $errors[] = "Stok alat '{$tool->nama_alat}' habis, tidak bisa dipinjam.";
-                continue;
+        try {
+            foreach ($request->items as $item) {
+                $tool = Tool::find($item['tool_id']);
+
+                // Validasi stok berdasarkan jumlah yang diminta
+                if ($tool->stok < $item['jumlah']) {
+                    $errors[] = "Stok alat '{$tool->nama_alat}' tidak mencukupi (tersedia {$tool->stok}, diminta {$item['jumlah']}).";
+                    continue;
+                }
+
+                // Simpan peminjaman dengan jumlah
+                Loan::create([
+                    'user_id' => $user->id,
+                    'tool_id' => $tool->id,
+                    'jumlah' => $item['jumlah'],                     // simpan jumlah
+                    'tanggal_pinjam' => $item['tanggal_pinjam'],
+                    'tanggal_kembali_rencana' => $item['tanggal_kembali_rencana'],
+                    'status' => 'pending',
+                ]);
+
+                // Kurangi stok alat sesuai jumlah
+                $tool->stok -= $item['jumlah'];
+                $tool->save();
+
+                // Activity log
+                ActivityLog::record('Pengajuan Peminjaman', "Mengajukan peminjaman {$item['jumlah']} unit alat: {$tool->nama_alat}");
+
+                $successCount++;
             }
 
-            // Simpan peminjaman
-            Loan::create([
-                'user_id' => $user->id,
-                'tool_id' => $tool->id,
-                'tanggal_pinjam' => $item['tanggal_pinjam'],
-                'tanggal_kembali_rencana' => $item['tanggal_kembali_rencana'],
-                'status' => 'pending', // sesuai kolom status di tabel loans
-            ]);
+            // Jika ada error, rollback semua perubahan (karena transaksi)
+            if (!empty($errors)) {
+                DB::rollBack();
+                return back()->withErrors($errors)->withInput();
+            }
 
-            // Catat activity log (optional, bisa disesuaikan)
-            ActivityLog::record('Pengajuan Peminjaman', "Mengajukan peminjaman alat: {$tool->nama_alat}");
+            DB::commit();
 
-            $successCount++;
-        }
-
-        if ($successCount > 0 && empty($errors)) {
             return redirect()->route('peminjam.dashboard')
                 ->with('success', "Berhasil mengajukan {$successCount} peminjaman. Menunggu persetujuan.");
-        } elseif ($successCount > 0 && !empty($errors)) {
-            return redirect()->route('peminjam.dashboard')
-                ->with('warning', "Berhasil mengajukan {$successCount} peminjaman, namun ada beberapa gagal: " . implode(' ', $errors));
-        } else {
-            return back()->withErrors($errors)->withInput();
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors(['Terjadi kesalahan: ' . $e->getMessage()])->withInput();
         }
     }
 

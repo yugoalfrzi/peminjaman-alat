@@ -29,9 +29,13 @@
                                         </option>
                                     @endforeach
                                 </select>
-                                <div class="form-text text-muted stok-info"></div>
+                                
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-1">
+                                <label class="form-label fw-bold">Jumlah <span class="text-danger">*</span></label>
+                                <input type="number" name="items[0][jumlah]" class="form-control jumlah-input" value="0" min="0" required>
+                            </div>
+                            <div class="col-md-2">
                                 <label class="form-label fw-bold">Tanggal Pinjam <span class="text-danger">*</span></label>
                                 <input type="date" name="items[0][tanggal_pinjam]" class="form-control date-pinjam" required value="{{ date('Y-m-d') }}" min="{{ date('Y-m-d') }}">
                             </div>
@@ -72,10 +76,10 @@
         const container = document.getElementById('itemsContainer');
         const addBtn = document.getElementById('addItemBtn');
 
-        // Fungsi untuk update status tombol hapus (disable jika hanya 1 item)
+        // ======================= FUNGSI UMUM =======================
         function updateRemoveButtons() {
             const items = document.querySelectorAll('.pinjam-item');
-            items.forEach((item, idx) => {
+            items.forEach((item) => {
                 const removeBtn = item.querySelector('.remove-item-btn');
                 if (items.length === 1) {
                     removeBtn.disabled = true;
@@ -87,29 +91,6 @@
                     removeBtn.title = 'Hapus baris ini';
                 }
             });
-        }
-
-        // Fungsi untuk menampilkan info stok ketika memilih alat
-        function attachStokListener(selectEl) {
-            selectEl.addEventListener('change', function() {
-                const selectedOption = this.options[this.selectedIndex];
-                const stok = selectedOption.getAttribute('data-stok') || 0;
-                const infoDiv = this.closest('.row')?.querySelector('.stok-info');
-                if (infoDiv) {
-                    if (this.value && stok <= 0) {
-                        infoDiv.innerHTML = '<span class="text-danger">Stok habis, tidak dapat dipinjam</span>';
-                        this.setCustomValidity('Stok habis');
-                    } else if (this.value) {
-                        infoDiv.innerHTML = `<span class="text-success">✓ Stok tersedia: ${stok}</span>`;
-                        this.setCustomValidity('');
-                    } else {
-                        infoDiv.innerHTML = '';
-                        this.setCustomValidity('');
-                    }
-                }
-            });
-            // Trigger awal
-            selectEl.dispatchEvent(new Event('change'));
         }
 
         // Validasi tanggal: tanggal kembali harus >= tanggal pinjam
@@ -128,21 +109,101 @@
             check();
         }
 
-        // Inisialisasi untuk item pertama (index 0)
-        const firstSelect = document.querySelector('.pinjam-item .tool-select');
-        const firstPinjam = document.querySelector('.pinjam-item .date-pinjam');
-        const firstKembali = document.querySelector('.pinjam-item .date-kembali');
-        if (firstSelect) attachStokListener(firstSelect);
-        if (firstPinjam && firstKembali) validateDateRange(firstPinjam, firstKembali);
+        // Cegah duplikasi alat yang sama dalam satu form
+        function preventDuplicateTools() {
+            const selects = document.querySelectorAll('.tool-select');
+            const selectedValues = Array.from(selects).map(s => s.value).filter(v => v !== '');
+            selects.forEach(select => {
+                if (select.value !== '') {
+                    const isDuplicate = selectedValues.filter(v => v === select.value).length > 1;
+                    if (isDuplicate) {
+                        select.setCustomValidity('Anda memilih alat yang sama lebih dari satu kali. Periksa kembali.');
+                    } else {
+                        // Jangan timpa validasi stok habis jika ada
+                        if (select.getCustomValidity() !== 'Stok habis' && select.getCustomValidity() !== 'Pilih alat terlebih dahulu') {
+                            select.setCustomValidity('');
+                        }
+                    }
+                }
+            });
+        }
 
-        // Tambah item baru
+        // ======================= VALIDASI STOK DAN JUMLAH =======================
+        function attachItemListeners(itemElement) {
+            const selectEl = itemElement.querySelector('.tool-select');
+            const jumlahInput = itemElement.querySelector('.jumlah-input');
+            const stokInfo = itemElement.querySelector('.stok-info');
+            const jumlahInfo = itemElement.querySelector('.jumlah-info');
+
+            function validateJumlah() {
+                if (!selectEl.value) {
+                    jumlahInput.setCustomValidity('Pilih alat terlebih dahulu');
+                    if (jumlahInfo) jumlahInfo.innerHTML = '<span class="text-warning">⚠ Pilih alat</span>';
+                    return;
+                }
+
+                const selectedOption = selectEl.options[selectEl.selectedIndex];
+                const stok = parseInt(selectedOption?.getAttribute('data-stok') || 0);
+                const jumlah = parseInt(jumlahInput.value) || 0;
+
+                if (stok <= 0) {
+                    jumlahInput.setCustomValidity('Stok habis, tidak dapat dipinjam');
+                    if (jumlahInfo) jumlahInfo.innerHTML = '<span class="text-danger">Stok habis</span>';
+                } else if (jumlah > stok) {
+                    jumlahInput.setCustomValidity(`Jumlah tidak boleh melebihi stok (${stok})`);
+                    if (jumlahInfo) jumlahInfo.innerHTML = `<span class="text-danger">Maksimal ${stok}</span>`;
+                } else if (jumlah < 1) {
+                    jumlahInput.setCustomValidity('Minimal 1');
+                    if (jumlahInfo) jumlahInfo.innerHTML = '<span class="text-danger">Minimal 1</span>';
+                } else {
+                    jumlahInput.setCustomValidity('');
+                    if (jumlahInfo) jumlahInfo.innerHTML = `<span class="text-success">✓ Tersedia ${stok}</span>`;
+                }
+            }
+
+            function updateStokInfo() {
+                const selectedOption = selectEl.options[selectEl.selectedIndex];
+                const stok = selectedOption?.getAttribute('data-stok') || 0;
+                if (selectEl.value) {
+                    if (stokInfo) stokInfo.innerHTML = `<span class="text-muted">Stok: ${stok}</span>`;
+                    validateJumlah();
+                } else {
+                    if (stokInfo) stokInfo.innerHTML = '';
+                    jumlahInput.setCustomValidity('Pilih alat');
+                    if (jumlahInfo) jumlahInfo.innerHTML = '<span class="text-warning">⚠ Pilih alat</span>';
+                }
+            }
+
+            selectEl.addEventListener('change', () => {
+                updateStokInfo();
+                validateJumlah();
+                preventDuplicateTools();
+            });
+            jumlahInput.addEventListener('input', validateJumlah);
+            jumlahInput.addEventListener('change', validateJumlah);
+
+            // Trigger awal
+            updateStokInfo();
+            validateJumlah();
+        }
+
+        // ======================= INISIALISASI ITEM PERTAMA =======================
+        const firstItem = document.querySelector('.pinjam-item');
+        if (firstItem) {
+            attachItemListeners(firstItem);
+            const firstPinjam = firstItem.querySelector('.date-pinjam');
+            const firstKembali = firstItem.querySelector('.date-kembali');
+            if (firstPinjam && firstKembali) validateDateRange(firstPinjam, firstKembali);
+        }
+
+        // ======================= TAMBAH ITEM BARU =======================
         addBtn.addEventListener('click', function () {
             const newIndex = itemCount;
             const newItem = document.createElement('div');
             newItem.className = 'pinjam-item card mb-3 p-3 border';
             newItem.innerHTML = `
                 <div class="row g-3 align-items-end">
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <label class="form-label fw-bold">Pilih Alat <span class="text-danger">*</span></label>
                         <select name="items[${newIndex}][tool_id]" class="form-select tool-select" required>
                             <option value="">-- Pilih Alat --</option>
@@ -154,7 +215,12 @@
                         </select>
                         <div class="form-text text-muted stok-info"></div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">Jumlah <span class="text-danger">*</span></label>
+                        <input type="number" name="items[${newIndex}][jumlah]" class="form-control jumlah-input" value="1" min="1" required>
+                        <div class="form-text text-muted jumlah-info"></div>
+                    </div>
+                    <div class="col-md-2">
                         <label class="form-label fw-bold">Tanggal Pinjam <span class="text-danger">*</span></label>
                         <input type="date" name="items[${newIndex}][tanggal_pinjam]" class="form-control date-pinjam" required min="{{ date('Y-m-d') }}">
                     </div>
@@ -173,24 +239,24 @@
             container.appendChild(newItem);
             itemCount++;
 
-            // Attach event listeners untuk elemen baru
-            const newSelect = newItem.querySelector('.tool-select');
+            // Attach semua event listener untuk item baru
+            attachItemListeners(newItem);
             const newPinjam = newItem.querySelector('.date-pinjam');
             const newKembali = newItem.querySelector('.date-kembali');
-            attachStokListener(newSelect);
             if (newPinjam && newKembali) validateDateRange(newPinjam, newKembali);
 
-            // Event hapus
             const removeBtn = newItem.querySelector('.remove-item-btn');
             removeBtn.addEventListener('click', function () {
                 newItem.remove();
                 updateRemoveButtons();
+                preventDuplicateTools(); // re-check duplikasi setelah hapus
             });
 
             updateRemoveButtons();
+            preventDuplicateTools();
         });
 
-        // Event hapus untuk item awal (setelah ada item tambahan, tombol hapus di item pertama diaktifkan)
+        // ======================= HANDLE HAPUS UNTUK ITEM STATIS & DINAMIS =======================
         function bindRemoveForExisting() {
             document.querySelectorAll('.pinjam-item .remove-item-btn').forEach(btn => {
                 btn.removeEventListener('click', btn._listener);
@@ -199,6 +265,7 @@
                     if (document.querySelectorAll('.pinjam-item').length > 1) {
                         item.remove();
                         updateRemoveButtons();
+                        preventDuplicateTools();
                     } else {
                         alert('Minimal satu alat harus dipinjam.');
                     }
@@ -208,7 +275,6 @@
             });
         }
 
-        // Override supaya tombol hapus dinamis bekerja
         const observer = new MutationObserver(() => {
             bindRemoveForExisting();
             updateRemoveButtons();
@@ -217,25 +283,7 @@
         bindRemoveForExisting();
         updateRemoveButtons();
 
-        // Validasi tambahan: cegah duplikasi alat yang sama dalam satu form? (opsional)
-        function preventDuplicateTools() {
-            const selects = document.querySelectorAll('.tool-select');
-            const selectedValues = Array.from(selects).map(s => s.value).filter(v => v !== '');
-            selects.forEach(select => {
-                if (select.value !== '') {
-                    const options = select.options;
-                    for (let i = 0; i < options.length; i++) {
-                        const opt = options[i];
-                        if (opt.value !== '' && selectedValues.filter(v => v === opt.value).length > 1 && opt.value === select.value) {
-                            select.setCustomValidity('Anda memilih alat yang sama lebih dari satu kali. Periksa kembali.');
-                        } else {
-                            if (select.getCustomValidity() !== 'Stok habis') select.setCustomValidity('');
-                        }
-                    }
-                }
-            });
-        }
-
+        // ======================= EVENT DUPLIKASI ALAT =======================
         container.addEventListener('change', function(e) {
             if (e.target.classList.contains('tool-select')) {
                 preventDuplicateTools();

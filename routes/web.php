@@ -12,7 +12,7 @@ use App\Http\Controllers\PeminjamController;
 use App\Http\Controllers\ToolController;
 use App\Http\Controllers\UserController;
 use App\Models\ActivityLog;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Auth; 
 
 // Login & Logout (Semua Role)
 Route::get('/', function () {
@@ -54,6 +54,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 Route::middleware(['auth', 'role:petugas'])->group(function () {
     Route::get('/petugas/dashboard', [PetugasController::class, 'index']);
     Route::post('/petugas/approve/{id}', [PetugasController::class, 'approve']); // Menyetujui
+    Route::post('/petugas/reject/{id}', [PetugasController::class, 'reject']); // penolakan
     Route::post('/petugas/return/{id}', [PetugasController::class, 'processReturn']); // Pengembalian
     Route::get('/petugas/laporan', [PetugasController::class, 'report']); // Cetak Laporan
 });

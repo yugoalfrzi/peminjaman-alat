@@ -42,33 +42,26 @@ class ToolController extends Controller
      */
     public function store(Request $request)
     {
-        // validasi input
         $request->validate([
             'nama_alat' => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
             'stok' => 'required|integer|min:0',
-            'gambar' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',//max 2mb
+            'gambar' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'deskripsi' => 'nullable|string',
         ]);
 
-        //handle upload gambar (jika ada)
-        $gambarPath = null;
-        if ($request->hasFile('gambar')){
-            //simpan difolder: storage/app/public/tools
-            $gambarPath = $request->file('gambar')->store('tools','public');
+        //siapkan data selain gambar
+        $data = $request->except('gambar');
+        // Handle upload gambar
+        if ($request->hasFile('gambar')) {
+            $path = $request->file('gambar')->store('tools', 'public');
+            $data['gambar'] = $path;
         }
 
-        // simpan ke database   
-        Tool::create([
-            'nama_alat' => $request->nama_alat,
-            'category_id' => $request->category_id,
-            'stok' => $request->stok,
-            'gambar' => $gambarPath,
-            'deskripsi' => $request->deskripsi,
-        ]);
+        // Simpan ke database
+        Tool::create($data);
 
-        // catat log
-        ActivityLog::record('Tambah Alat', 'Menambahkan alat baru' . $request->nama_alat);
+        ActivityLog::record('Tambah Alat', 'Menambahkan alat baru: ' . $request->nama_alat);
 
         return redirect()->route('tools.index')->with('success', 'Alat berhasil ditambahkan.');
     }
@@ -95,21 +88,25 @@ class ToolController extends Controller
             'deskripsi' => 'nullable|string',
         ]);
 
-        //handle ganti gambar
+        // Ambil semua data kecuali gambar (file)
+        $data = $request->except('gambar');
+
         if ($request->hasFile('gambar')) {
-            //hapus gambar lama jika ada
+            // Hapus gambar lama
             if ($tool->gambar && Storage::disk('public')->exists($tool->gambar)) {
                 Storage::disk('public')->delete($tool->gambar);
             }
-            //simpan gambar baru
-            $data['gambar'] = $request->file('gambar')->store('tools', 'public');
+            // Upload baru, simpan di folder 'tools' (sama seperti store)
+            $gambarPath = $request->file('gambar')->store('tools', 'public');
+            $data['gambar'] = $gambarPath;
         }
 
-        $tool->update($request->all());
+        // Update data
+        $tool->update($data);
 
-        ActivityLog::record('Update alat', 'Memperbarui data alat' . $tool->nama_alat);
+        ActivityLog::record('Update Alat', 'Memperbarui data alat: ' . $tool->nama_alat);
 
-        return redirect()->route('tools.index')->with('succes', 'Data alat diperbarui');
+        return redirect()->route('tools.index')->with('success', 'Data alat berhasil diperbarui');
     }
     
      /**
