@@ -92,7 +92,12 @@ class PeminjamController extends Controller
             ->with('tool')
             ->orderBy('created_at', 'desc')
             ->get();
-        return view('peminjam.riwayat', compact('loans'));
+
+        $pendingLoans = $loans->where('status', 'pending')->values();
+        $approvedLoans = $loans->where('status', 'disetujui')->values();
+        $returnedLoans = $loans->where('status', 'kembali')->values();
+
+        return view('peminjam.riwayat', compact('pendingLoans', 'approvedLoans', 'returnedLoans'));
     }
 
 }

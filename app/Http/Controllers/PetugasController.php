@@ -26,13 +26,33 @@ class PetugasController extends Controller
         return view('petugas.dashboard', compact('loans', 'activeLoans', 'sudahDikembalikan'));
     }
 
-    public function approve($id) 
+    public function approve(Request $request, $id) 
     {
+        $request->validate([
+            'initial_photo' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+        ]);
+
         $loan = Loan::findOrFail($id);
+
+        if ($loan->status !== 'pending') {
+            return back()->with('error', 'Peminjaman tidak valid atau sudah diproses.');
+        }
+
+        $initialPhoto = null;
+        if ($request->hasFile('initial_photo')) {
+            $initialPhoto = $request->file('initial_photo')->store('approvals', 'public');
+        }
+
         $loan->update([
             'status' => 'disetujui',
-            'petugas_id' => Auth::id()
+            'petugas_id' => Auth::id(),
+            'initial_photo' => $initialPhoto,
         ]);
+
+        ActivityLog::record(
+            'Persetujuan Peminjaman',
+            "Menyetujui peminjaman alat {$loan->tool->nama_alat} untuk {$loan->user->name} | Foto kondisi awal: {$initialPhoto}"
+        );
 
         return back()->with('success', 'Peminjaman disetujui.');
     }

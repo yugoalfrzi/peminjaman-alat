@@ -5,8 +5,8 @@
         <h3 class="mb-0">Data Pengembalian Alat</h3>
         <a href="{{ route('admin.returns.create') }}" class="btn btn-success">+ Proses Pengembalian Baru</a>
     </div>
-    <div class="card shadow-sm border-0 rounded-4">
-        <div class="card-body">
+    <div class="card shadow-sm border-0 rounded-0">
+        <div class="card-body p-4">
             <div class="mb-3">
                 <form action="{{ route('admin.returns.index') }}" method="GET" class="d-flex gap-2" style="max-width: 460px;">
                     <input type="text" name="search" class="form-control" placeholder="Cari nama peminjam atau alat..." value="{{ request('search') }}">
@@ -17,8 +17,8 @@
                 </form>
             </div>
             <div class="table-responsive">
-                <table class="table table-bordered table-hover table-striped align-middle mb-0">
-                    <thead class="table-light">
+                <table class="table table-hover align-middle">
+                    <thead class="table">
                         <tr>
                             <th>No</th>
                             <th>Peminjam</th>

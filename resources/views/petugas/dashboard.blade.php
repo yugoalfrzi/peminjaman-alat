@@ -6,14 +6,14 @@
         <h1>Dashboard Petugas</h1>
         <p class="text-muted">Selamat datang, {{ auth()->user()->name }}!</p>
     </div>
-    <div class="card mb-4 pb-4 shadow-sm border-0 rounded-4"> 
+    <div class="card mb-4 pb-4 shadow-sm border-0 rounded-0"> 
         <h3 class="pt-4 pb-2">Permintaan Peminjaman Masuk</h3>
         <div class="card">
-            <div class="card-header bg-warning text-dark">Menunggu Persetujuan</div>
-            <div class="card-body">
+            <div class="card-header fw-bold bg-white py-2">Menunggu Persetujuan</div>
+            <div class="card-body p-4">
                 <div class="table-responsive">
-                    <table class="table table-bordered table-striped table-hover align-middle">
-                        <thead class="table-light">
+                    <table class="table table-bordered table-hover align-middle">
+                        <thead class="table">
                             <tr>
                                 <th>Peminjam</th>
                                 <th>Alat</th>
@@ -53,11 +53,14 @@
                                     <td>
                                         @foreach($userLoans as $loan)
                                             <div class="mb-2 pb-2 border-bottom">
-                                                <div class="small mb-1">{{ $loan->tool->nama_alat }}</div>
-                                                <form action="{{ url('/petugas/approve/'.$loan->id) }}" method="POST" class="d-inline">
-                                                    @csrf
-                                                    <button class="btn btn-success btn-sm">Setujui</button>
-                                                </form>
+                                                <button type="button"
+                                                    class="btn btn-success btn-sm btn-open-approve-modal"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#approveModal"
+                                                    data-loan-id="{{ $loan->id }}"
+                                                    data-tool-name="{{ $loan->tool->nama_alat }}">
+                                                    Setujui
+                                                </button>
                                                 <form action="{{ url('/petugas/reject/' .$loan->id) }}" method="POST" class="d-inline">
                                                     @csrf
                                                     <button class="btn btn-danger btn-sm">Tolak</button>
@@ -75,13 +78,13 @@
             </div>
         </div>
     </div>
-    <div class="card mb-4 pb-4 shadow-sm border-0 rounded-4">
+    <div class="card mb-4 pb-4 shadow-sm border-0 rounded-0">
       <h3 class="pt-4 pb-2">Daftar sedang dipinjam</h3>
       <div class="card">
-          <div class="card-header bg-info text-dark">Monitor Peminjaman</div>
-          <div class="card-body">
+          <div class="card-header fw-bold bg-white">Monitor Peminjaman</div>
+          <div class="card-body p-4">
               <div class="table-responsive">
-                  <table class="table table-bordered table-striped table-hover align-middle">
+                  <table class="table table-bordered table-hover align-middle">
                       <thead class="table-light">
                           <tr>
                               <th>Peminjam</th>
@@ -143,24 +146,32 @@
                                   <td>
                                       @foreach($userActiveLoans as $active)
                                           <div class="mb-2 pb-2 border-bottom">
-                                              <form action="{{ url('/petugas/return/'.$active->id) }}" method="POST" class="return-form" enctype="multipart/form-data">
-                                                  @csrf
-                                                  <div class="mb-1">
-                                                      <input type="file" name="proof_photo" accept="image/*" required class="form-control form-control-sm">
-                                                      <small class="d-block text-muted">Upload bukti {{ $active->tool->nama_alat }}</small>
-                                                  </div>
-                                                  <div class="mb-1">
-                                                      <select name="kerusakan" class="form-select form-select-sm select-kerusakan" data-id="{{ $active->id }}">
-                                                          <option value="tidak_rusak">Tidak rusak (Rp 0)</option>
-                                                          <option value="ringan">Rusak ringan (Rp 5.000)</option>
-                                                          <option value="sedang">Rusak sedang (Rp 10.000)</option>
-                                                          <option value="berat">Rusak berat (Rp 20.000)</option>
-                                                      </select>
-                                                      <small class="text-muted">Pilih tingkat kerusakan</small>
-                                                  </div>
-                                                  <input type="hidden" name="tanggal_kembali_aktual" class="hidden-tgl" id="hidden-tgl-{{ $active->id }}" value="">
-                                                  <button type="submit" class="btn btn-primary btn-sm mt-2">Proses Kembali</button>
-                                              </form>
+                                              <div class="mb-1">
+                                                  @if($active->initial_photo)
+                                                      <a href="{{ asset('storage/' . $active->initial_photo) }}" target="_blank" class="btn btn-sm btn-outline-secondary mb-1">
+                                                          Lihat Foto Awal
+                                                      </a>
+                                                  @else
+                                                      <small class="d-block text-muted">Foto kondisi awal belum tersedia</small>
+                                                  @endif
+                                              </div>
+                                              <div class="mb-1">
+                                                  <select name="kerusakan" class="form-select form-select-sm select-kerusakan" data-id="{{ $active->id }}">
+                                                      <option value="tidak_rusak">Tidak rusak (Rp 0)</option>
+                                                      <option value="ringan">Rusak ringan (Rp 5.000)</option>
+                                                      <option value="sedang">Rusak sedang (Rp 10.000)</option>
+                                                      <option value="berat">Rusak berat (Rp 20.000)</option>
+                                                  </select>
+                                                  <small class="text-muted">Pilih tingkat kerusakan</small>
+                                              </div>
+                                              <button type="button"
+                                                  class="btn btn-primary btn-sm mt-2 btn-open-return-modal"
+                                                  data-bs-toggle="modal"
+                                                  data-bs-target="#returnModal"
+                                                  data-loan-id="{{ $active->id }}"
+                                                  data-tool-name="{{ $active->tool->nama_alat }}">
+                                                  Upload Foto & Proses
+                                              </button>
                                           </div>
                                       @endforeach
                                   </td>
@@ -174,13 +185,13 @@
           </div>
       </div>
     </div>
-    <div class="card mb-4 pb-4 shadow-sm border-0 rounded-4">
+    <div class="card mb-4 pb-4 shadow-sm border-0 rounded-0">
         <h3 class="pt-4 pb-2">Daftar Sudah Dikembalikan</h3>
         <div class="card">
-            <div class="card-header bg-success text-dark">Monitor Peminjaman</div>
-            <div class="card-body">
+            <div class="card-header fw-bold bg-white">Monitor Peminjaman</div>
+            <div class="card-body p-4">
                 <div class="table-responsive">
-                    <table class="table table-bordered table-striped table-hover align-middle">
+                    <table class="table table-bordered table-hover align-middle">
                         <thead class="table-light">
                             <tr>
                                 <th>Peminjam</th>
@@ -254,6 +265,55 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="approveModal" tabindex="-1" aria-labelledby="approveModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="approveModalForm" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title" id="approveModalLabel">Setujui Peminjaman</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-2">Upload foto kondisi awal untuk alat: <strong id="approveToolName">-</strong></p>
+                    <input type="file" name="initial_photo" accept="image/*" required class="form-control">
+                    <small class="text-muted">Format: JPG/PNG, maksimal 2MB.</small>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-success">Setujui</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="returnModal" tabindex="-1" aria-labelledby="returnModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="returnModalForm" method="POST" enctype="multipart/form-data">
+                @csrf
+                <input type="hidden" name="tanggal_kembali_aktual" id="modalTanggalKembaliAktual">
+                <input type="hidden" name="kerusakan" id="modalKerusakan">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="returnModalLabel">Proses Pengembalian</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-2">Upload foto kondisi akhir untuk alat: <strong id="returnToolName">-</strong></p>
+                    <input type="file" name="proof_photo" accept="image/*" required class="form-control mb-2">
+                    <small class="text-muted d-block">Tanggal kembali dan tingkat kerusakan mengikuti pilihan di tabel.</small>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Proses Kembali</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Fungsi untuk menghitung denda keterlambatan (Rp 5000/hari)
@@ -323,6 +383,39 @@
             const loanId = select.getAttribute('data-id');
             select.addEventListener('change', function() {
                 updateTotalDenda(loanId);
+            });
+        });
+
+        const approveModalForm = document.getElementById('approveModalForm');
+        const approveToolName = document.getElementById('approveToolName');
+        const approveButtons = document.querySelectorAll('.btn-open-approve-modal');
+
+        approveButtons.forEach((btn) => {
+            btn.addEventListener('click', function () {
+                const loanId = this.getAttribute('data-loan-id');
+                const toolName = this.getAttribute('data-tool-name');
+                approveModalForm.setAttribute('action', `/petugas/approve/${loanId}`);
+                approveToolName.textContent = toolName || '-';
+            });
+        });
+
+        const returnModalForm = document.getElementById('returnModalForm');
+        const returnToolName = document.getElementById('returnToolName');
+        const modalTanggalInput = document.getElementById('modalTanggalKembaliAktual');
+        const modalKerusakanInput = document.getElementById('modalKerusakan');
+        const returnButtons = document.querySelectorAll('.btn-open-return-modal');
+
+        returnButtons.forEach((btn) => {
+            btn.addEventListener('click', function () {
+                const loanId = this.getAttribute('data-loan-id');
+                const toolName = this.getAttribute('data-tool-name');
+                const tglInput = document.querySelector(`.tgl-aktual[data-id="${loanId}"]`);
+                const kerusakanInput = document.querySelector(`.select-kerusakan[data-id="${loanId}"]`);
+
+                returnModalForm.setAttribute('action', `/petugas/return/${loanId}`);
+                returnToolName.textContent = toolName || '-';
+                modalTanggalInput.value = tglInput ? tglInput.value : '';
+                modalKerusakanInput.value = kerusakanInput ? kerusakanInput.value : 'tidak_rusak';
             });
         });
     });

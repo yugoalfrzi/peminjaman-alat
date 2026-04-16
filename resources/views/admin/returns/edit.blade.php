@@ -19,8 +19,7 @@
                         </div>
                         <div class="mb-3">
                             <label>Tanggal Kembali Aktual</label>
-                            <input type="date" name="tanggal_kembali_aktual" class="form-control" value="{{ $loan->tanggal_kembali_aktual }}" required>
-                            <small class="text-muted">Ubah tanggal ini jika admin salah input waktu pengembalian.</small>
+                            <input type="date" name="tanggal_kembali_rencana" class="form-control"value="{{ old('tanggal_kembali_rencana', optional($loan->tanggal_kembali_rencana)->format('Y-m-d') ?? '') }}">                            <small class="text-muted">Ubah tanggal ini jika admin salah input waktu pengembalian.</small>
                         </div>
                         <div class="d-flex justify-content-between gap-2">
                             <a href="{{ route('admin.returns.index') }}" class="btn btn-secondary">Batal</a>

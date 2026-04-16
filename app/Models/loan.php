@@ -13,6 +13,8 @@ class Loan extends Model
         'tanggal_pinjam'        => 'datetime',
         'tanggal_kembali_rencana'=> 'datetime',
         'tanggal_kembali_aktual' => 'datetime',
+        'is_paid' => 'boolean',
+        'paid_at' => 'datetime',
     ];
 
     public function user()
@@ -28,6 +30,11 @@ class Loan extends Model
     public function petugas()
     {
         return $this->belongsTo(User::class, 'petugas_id');
+    }
+
+    public function transaction()
+    {
+        return $this->hasOne(Transaction::class);
     }
 
     /**

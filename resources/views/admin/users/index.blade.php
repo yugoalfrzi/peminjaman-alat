@@ -7,20 +7,21 @@
             + Tambah User Baru
         </a>
     </div>
-    <div class="mb-3">
-        <form action="{{ route('users.index') }}" method="GET" class="d-flex gap-2" style="max-width: 400px;">
-            <input type="text" name="search" class="form-control" placeholder="Cari Nama atau Email..." value="{{ request('search') }}">
-            <button type="submit" class="btn btn-outline-primary">Cari</button>
-            @if(request('search'))
-                <a href="{{ route('users.index') }}" class="btn btn-outline-danger btn-sm">Reset</a>
-            @endif
-        </form>
-    </div>
+    
 
-    <div class="card">
-        <div class="card-body">
-            <table class="table table-bordered table-hover table-striped align-middle">
-                <thead class="table-light">
+    <div class="card rounded-0">
+        <div class="card-body p4">
+            <div class="mb-3">
+                <form action="{{ route('users.index') }}" method="GET" class="d-flex gap-2" style="max-width: 400px;">
+                    <input type="text" name="search" class="form-control" placeholder="Cari Nama atau Email..." value="{{ request('search') }}">
+                    <button type="submit" class="btn btn-outline-primary">Cari</button>
+                    @if(request('search'))
+                        <a href="{{ route('users.index') }}" class="btn btn-outline-danger btn-sm">Reset</a>
+                    @endif
+                </form>
+            </div>
+            <table class="table table-hover align-middle">
+                <thead class="table">
                     <tr>
                         <th width="5%">No</th>
                         <th>Nama Lengkap</th>

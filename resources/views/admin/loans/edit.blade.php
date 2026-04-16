@@ -36,12 +36,11 @@
                 <div class="row mb-3">
                     <div class="col">
                         <label>Tgl Pinjam</label>
-                        <input type="date" name="tanggal_pinjam" class="form-control" value="{{ $loan->tanggal_pinjam }}">
+                        <input type="date" name="tanggal_pinjam" class="form-control" value="{{ old('tanggal_pinjam', optional($loan->tanggal_pinjam)->format('Y-m-d') ?? '') }}">
                     </div>
                     <div class="col">
                         <label>Rencana Kembali</label>
-                        <input type="date" name="tanggal_kembali_rencana" class="form-control" value="{{ $loan->tanggal_kembali_rencana }}">
-                    </div>
+                        <input type="date" name="tanggal_kembali_rencana" class="form-control" value="{{ old('tanggal_kembali_rencana', optional($loan->tanggal_kembali_rencana)->format('Y-m-d') ?? '') }}">                    </div>
                 </div>
                 <div class="mb-3">
                     <label>Status</label>

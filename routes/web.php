@@ -11,6 +11,7 @@ use App\Http\Controllers\PetugasController;
 use App\Http\Controllers\PeminjamController;
 use App\Http\Controllers\ToolController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\PaymentController;
 use App\Models\ActivityLog;
 use Illuminate\Support\Facades\Auth; 
 
@@ -65,3 +66,10 @@ Route::middleware(['auth', 'role:peminjam'])->group(function () {
     Route::post('/peminjam/ajukan', [PeminjamController::class, 'store']); // Mengajukan
     Route::get('/peminjam/riwayat', [PeminjamController::class, 'history']); // Riwayat & Kembalikan
 });
+
+// Route untuk pembayaran
+Route::middleware(['auth'])->group(function (){
+    Route::post('/payment/process', [PaymentController::class, 'process'])->name('payment.process');
+});
+//Route notifikasi
+Route::post('/payment/notification', [PaymentController::class, 'notification'])->name('payment.notification');
